@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game-Core-UI/VisualAssets/modal.uss?fileID=7433441132597879392&amp;guid=358e3362d3cb4214aa93752eed0f6f83&amp;type=3#modal" />
+    <ui:VisualElement name="ModalMask" class="modal-mask" style="flex-grow: 1;">
+        <ui:VisualElement picking-mode="Ignore" style="flex-grow: 1; justify-content: center;">
+            <ui:VisualElement name="Modal" class="modal modal-hidden">
+                <ui:VisualElement name="ModalHeader" class="center-horizontal-row modal-header header-2xl" style="text-overflow: ellipsis;" />
+                <ui:VisualElement name="ModalContent" class="modal-content" />
+                <ui:VisualElement name="ModalFooter" class="center-horizontal-row modal-footer header2" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

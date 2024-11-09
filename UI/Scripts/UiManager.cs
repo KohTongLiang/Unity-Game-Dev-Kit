@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,6 +9,9 @@ namespace GameCore.UI
     {
         [field: SerializeField]
         public List<GameObject> Pages { get; set; }
+
+        [field: SerializeField]
+        public List<GameObject> Components { get; set; }
 
         private GameObject currentPage { get; set; }
 
@@ -41,10 +43,11 @@ namespace GameCore.UI
         /// </summary>
         /// <param name="componentName"></param>
         /// <param name="show"></param>
-        public void ShowComponent(string componentName, bool show = true)
+        public void ShowComponent(string componentName, RootViewModel source, bool show = true)
         {
-            var component = Pages.Find(p => p.name == componentName);
+            var component = Components.Find(p => p.name == componentName);
             component.SetActive(show);
+            source.OpenedComponents.Push(component);
         }
     }
 }

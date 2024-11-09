@@ -6,30 +6,36 @@ using UnityEngine.UIElements;
 
 namespace GameCore.UI
 {
-    public class Modal : MonoBehaviour
+    public class Modal : RootViewModel
     {
-        [SerializeField] protected VisualTreeAsset modalBodyAsset;
+        [SerializeField] private string Directory = "Assets/GameCore/UI/VisualAssets/";
+
+        [Header("Modal Stylesheet Override")]
+        [SerializeField] private StyleSheet modalStyleSheet;
 
         private AsyncOperationHandle<VisualTreeAsset> assetOperation;
-        private VisualElement UIComponent;
-        private VisualElement _gameContentContainer, _modalMask;
+        private VisualElement _modalMask;
         private VisualTreeAsset modalAsset;
 
         private WaitForSeconds transitionDelay = new(0.5f);
 
         protected VisualElement modalHeader, modalContent, modalFooter, modal;
 
-        private const string ModalPath = "Assets/GameCore/UI Framework/VisualAssets/modal.uxml";
+        private string _modalPath;
 
-        protected virtual void OnEnable()
+        // Child Template
+        protected VisualElement ModalContentAsset;
+
+        protected override void OnEnable()
         {
-            _gameContentContainer ??= UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
-            CoroutineHandler.Instance.StartHandlerCoroutine(GetHashCode().ToString(), RunAssetLoading());
+            _modalPath = Directory + "modal.uxml";
+            GameContentContainer ??= UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
+            _ = CoroutineHandler.Instance.StartHandlerCoroutine(GetHashCode().ToString(), RunAssetLoading());
         }
 
         private IEnumerator RunAssetLoading()
         {
-            assetOperation = Addressables.LoadAssetAsync<VisualTreeAsset>(ModalPath);
+            assetOperation = Addressables.LoadAssetAsync<VisualTreeAsset>(_modalPath);
             yield return assetOperation;
 
             if (assetOperation.Status == AsyncOperationStatus.Succeeded)
@@ -41,14 +47,25 @@ namespace GameCore.UI
                 UIComponent.AddToClassList("modal-template");
                 _modalMask = UIComponent.Q<VisualElement>("ModalMask");
 
-                _gameContentContainer.Add(UIComponent);
+                GameContentContainer.Add(UIComponent);
                 modal = UIComponent.Q<VisualElement>("Modal");
-                CoroutineHandler.Instance.StartHandlerCoroutine("CloseModal", AnimateModal(true));
+                _ = CoroutineHandler.Instance.StartHandlerCoroutine("CloseModal", AnimateModal(true));
+
+                if (modalStyleSheet != null)
+                {
+                    modal.styleSheets.Clear();
+                    modal.styleSheets.Add(modalStyleSheet);
+                }
+
                 LoadModalContent();
+            }
+            else if (assetOperation.Status == AsyncOperationStatus.Failed)
+            {
+                Debug.LogWarning($"Failed to load modal asset for {_modalPath}");
             }
         }
 
-        protected virtual void OnDisable()
+        protected override void OnDisable()
         {
             UnloadModalContent();
         }
@@ -61,6 +78,12 @@ namespace GameCore.UI
             modalHeader = UIComponent.Q<VisualElement>("ModalHeader");
             modalContent = UIComponent.Q<VisualElement>("ModalContent");
             modalFooter = UIComponent.Q<VisualElement>("ModalFooter");
+
+            ModalContentAsset = UIAsset.Instantiate();
+
+            var childAsset = UIAsset.Instantiate().contentContainer;
+            childAsset.style.flexGrow = new StyleFloat(templateContainerFlexGrow);
+            modalContent.Add(childAsset);
         }
 
         private IEnumerator AnimateModal(bool show)
@@ -76,7 +99,7 @@ namespace GameCore.UI
             {
                 modal.style.translate = new Translate(0f, new Length(300, LengthUnit.Percent), 0f);
                 yield return transitionDelay;
-                _gameContentContainer.Remove(UIComponent);
+                GameContentContainer.Remove(UIComponent);
                 Addressables.Release(assetOperation);
             }
         }
@@ -84,7 +107,7 @@ namespace GameCore.UI
         protected virtual void UnloadModalContent()
         {
             _modalMask.UnregisterCallback<ClickEvent>(CloseModal);
-            CoroutineHandler.Instance.StartHandlerCoroutine("CloseModal", AnimateModal(false));
+            _ = CoroutineHandler.Instance.StartHandlerCoroutine("CloseModal", AnimateModal(false));
             modalAsset = null;
         }
 

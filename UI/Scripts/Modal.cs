@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
+using UnityServiceLocator;
 
 namespace GameCore.UI
 {
@@ -26,11 +27,14 @@ namespace GameCore.UI
         // Child Template
         protected VisualElement ModalContentAsset;
 
+        protected CoroutineHandler coroutines;
+
         protected override void OnEnable()
         {
+            coroutines = ServiceLocator.For(this).Get<CoroutineHandler>();
             _modalPath = Directory + "modal.uxml";
             GameContentContainer ??= UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
-            _ = CoroutineHandler.Instance.StartHandlerCoroutine(GetHashCode().ToString(), RunAssetLoading());
+            _ = coroutines.StartHandlerCoroutine(GetHashCode().ToString(), RunAssetLoading());
         }
 
         private IEnumerator RunAssetLoading()
@@ -49,7 +53,7 @@ namespace GameCore.UI
 
                 GameContentContainer.Add(UIComponent);
                 modal = UIComponent.Q<VisualElement>("Modal");
-                _ = CoroutineHandler.Instance.StartHandlerCoroutine("CloseModal", AnimateModal(true));
+                _ = coroutines.StartHandlerCoroutine("CloseModal", AnimateModal(true));
 
                 if (modalStyleSheet != null)
                 {
@@ -107,7 +111,7 @@ namespace GameCore.UI
         protected virtual void UnloadModalContent()
         {
             _modalMask.UnregisterCallback<ClickEvent>(CloseModal);
-            _ = CoroutineHandler.Instance.StartHandlerCoroutine("CloseModal", AnimateModal(false));
+            _ = coroutines.StartHandlerCoroutine("CloseModal", AnimateModal(false));
             modalAsset = null;
         }
 

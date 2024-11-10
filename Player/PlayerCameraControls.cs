@@ -1,5 +1,9 @@
 using System;
+#if UNITY_6000
+using Unity.Cinemachine;
+#else
 using Cinemachine;
+#endif
 using UnityEngine;
 using UnityEngine.InputSystem;
 

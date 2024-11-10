@@ -72,7 +72,7 @@ namespace GameCore
         private void SldingMovement()
         {
             Vector3 inputDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
-            if (!playerMovement.OnSlope() || rb.velocity.y > -0.1f)
+            if (!playerMovement.OnSlope() || rb.linearVelocity.y > -0.1f)
             {
                 rb.AddForce(inputDirection.normalized * slideForce, ForceMode.Force);
                 slideTimer -= Time.deltaTime;

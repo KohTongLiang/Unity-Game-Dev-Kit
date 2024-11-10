@@ -72,7 +72,7 @@ namespace GameCore
             ObjectiveState = QuestObjectiveState.Inactive;
             ObjectiveCompleteCallback?.Invoke();
             ObjectiveCompleteCallback = null;
-            WaypointManager.Instance.CleanUp();
+            // WaypointManager.Instance.CleanUp();
         }
     }
 }

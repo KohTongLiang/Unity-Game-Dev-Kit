@@ -84,7 +84,7 @@ namespace GameCore
             if (sliding)
             {
                 GetPlayerMovementState = MovementState.Sliding;
-                if (OnSlope() && _rb.velocity.y < 0.1f)
+                if (OnSlope() && _rb.linearVelocity.y < 0.1f)
                 {
                     desiredMoveSpeed = slidingSpeed;
                 }
@@ -96,7 +96,7 @@ namespace GameCore
 
             if (_grounded)
             {
-                GetPlayerMovementState = _rb.velocity.magnitude == 0f ? MovementState.Default : MovementState.Walking;
+                GetPlayerMovementState = _rb.linearVelocity.magnitude == 0f ? MovementState.Default : MovementState.Walking;
                 desiredMoveSpeed = walkSpeed * _walkingSpeedModifier;
             }
             else
@@ -233,7 +233,7 @@ namespace GameCore
                 _rb.AddForce(GetSlopeMoveDirection(_moveDirection) * _moveSpeed * _playerState.StaminaFactor * 2f,
                     ForceMode.Force);
 
-                if (_rb.velocity.y > 0)
+                if (_rb.linearVelocity.y > 0)
                 {
                     _rb.AddForce(Vector3.down * 50f, ForceMode.Force);
                 }
@@ -278,7 +278,7 @@ namespace GameCore
         {
             _playerState.DecreaseStamina(20f);
             _exitingSlope = true;
-            _rb.velocity = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
             _rb.AddForce(transform.up * jumpForce * _playerState.StaminaFactor, ForceMode.Impulse);
         }
 
@@ -295,23 +295,23 @@ namespace GameCore
         protected void GroundCheck()
         {
             _grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, groundMask);
-            _rb.drag = _grounded ? groundDrag : 0;
+            _rb.linearDamping = _grounded ? groundDrag : 0;
         }
 
         protected void SpeedControl()
         {
             if (OnSlope() && !_exitingSlope)
             {
-                if (_rb.velocity.magnitude > _moveSpeed) _rb.velocity = _rb.velocity.normalized * _moveSpeed;
+                if (_rb.linearVelocity.magnitude > _moveSpeed) _rb.linearVelocity = _rb.linearVelocity.normalized * _moveSpeed;
             }
             else
             {
-                Vector3 flatVelocity = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
+                Vector3 flatVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
                 if (flatVelocity.magnitude > _moveSpeed)
                 {
                     Vector3 limitedVel = flatVelocity.normalized * _moveSpeed;
-                    _rb.velocity = new Vector3(limitedVel.x, _rb.velocity.y, limitedVel.z);
+                    _rb.linearVelocity = new Vector3(limitedVel.x, _rb.linearVelocity.y, limitedVel.z);
                 }
             }
         }

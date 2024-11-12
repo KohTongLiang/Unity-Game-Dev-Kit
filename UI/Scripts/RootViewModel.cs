@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -68,21 +67,21 @@ namespace GameCore.UI
         /// Automatically look up button and binds button. Automatically unregister callback on disable.
         /// </summary>
         /// <param name="elementId"></param>
+        /// <param name="button"></param>
         /// <param name="callback"></param>
         /// <returns>Optional Button</returns>
-        [CanBeNull]
-        protected Button BindButton(string elementId, Action callback)
+        protected bool BindButton(string elementId, out Button button, Action callback)
         {
-            var button = UIComponent.Q<Button>(elementId);
+            button = UIComponent.Q<Button>(elementId);
             if (button == null)
             {
                 Debug.LogError($"Button {elementId}: Not Found.");
-                return null;
+                return false;
             }
 
             button.clicked += callback;
             _buttonCallbacks.Add(new ButtonCallback(button, callback));
-            return button;
+            return true;
         }
 
         /// <summary>

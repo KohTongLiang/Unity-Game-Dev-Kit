@@ -14,7 +14,6 @@ namespace GameCore.UI
         public List<GameObject> Components { get; set; }
 
         private GameObject currentPage { get; set; }
-
         public UIDocument rootDocument { get; private set; }
 
         private void Awake()
@@ -48,6 +47,17 @@ namespace GameCore.UI
             var component = Components.Find(p => p.name == componentName);
             component.SetActive(show);
             source.OpenedComponents.Push(component);
+        }
+
+        /// <summary>
+        /// Show floating components (not tagged to any page or component).
+        /// </summary>
+        /// <param name="componentName"></param>
+        /// <param name="show"></param>
+        public void ShowComponent(string componentName, bool show = true)
+        {
+            var component = Components.Find(p => p.name == componentName);
+            component.SetActive(show);
         }
     }
 }

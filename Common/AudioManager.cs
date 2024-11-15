@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityServiceLocator;
 
 namespace GameCore
 {
@@ -12,9 +13,18 @@ namespace GameCore
         [SerializeField] private int poolSize = 10;
 
         private readonly Dictionary<string, AudioClip> _audioClipDictionary = new();
-        private readonly Dictionary<string, Coroutine> _playingAudios = new();
+        private readonly Dictionary<string, IEnumerator> _playingAudios = new();
         private readonly Dictionary<string, AudioSource> _playingAudiosource = new();
         private Queue<AudioSource> _audioPool;
+
+        private CoroutineHandler coroutineHandler;
+
+        private void OnEnable()
+        {
+            ServiceLocator.Global.Register(this);
+
+            coroutineHandler = ServiceLocator.For(this).Get<CoroutineHandler>();
+        }
 
         private void Awake()
         {
@@ -39,7 +49,6 @@ namespace GameCore
             {
                 var audioSource = gameObject.AddComponent<AudioSource>();
                 audioSource.playOnAwake = false;
-                // audioSource.enabled = false;
                 _audioPool.Enqueue(audioSource);
             }
         }
@@ -59,7 +68,6 @@ namespace GameCore
             }
             else
             {
-                Debug.Log("No audio source available");
                 return;
             }
             
@@ -74,15 +82,15 @@ namespace GameCore
             audioSource.loop = playLoop;
             audioSource.Play();
 
-            var audioPlaying = StartCoroutine(EnqueueWhenFinished(clipName, audioSource));
+            var audioPlaying = coroutineHandler.StartHandlerCoroutine(clipName, EnqueueWhenFinished(clipName, audioSource));
             _playingAudios.Add(clipName, audioPlaying);
             _playingAudiosource.Add(clipName, audioSource);
         }
 
         public void Stop(string clipName)
         {
-            if (!_playingAudios.ContainsKey(clipName)) return;
-            StopCoroutine(_playingAudios[clipName]);
+            if (!_playingAudios.TryGetValue(clipName, out var playingAudio)) return;
+            coroutineHandler.StopHandlerCoroutine(clipName);
 
             var audioSource = _playingAudiosource[clipName];
             audioSource.Stop();

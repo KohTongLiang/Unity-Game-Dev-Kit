@@ -18,8 +18,14 @@ namespace GameCore
         /// <param name="sceneAddress">Addressable address</param>
         /// <param name="origin">The caller of the function</param>
         /// <param name="mode">Single, Additive etc.</param>
+        /// <param name="setSceneActive">Specify to set the newly loaded scene as active</param>
         /// <param name="sceneLoadedCallback">Callback that will be fired once the scene is loaded successfully.</param>
-        public void LoadScene(string sceneAddress, string origin, LoadSceneMode mode, Action sceneLoadedCallback = null)
+        public void LoadScene(
+            string sceneAddress,
+            string origin,
+            LoadSceneMode mode,
+            bool setSceneActive = false,
+            Action sceneLoadedCallback = null)
         {
             if (sceneLoaded.ContainsKey(sceneAddress + origin))
             {
@@ -28,15 +34,20 @@ namespace GameCore
 
             // Load the scene using Addressables
             AsyncOperationHandle<SceneInstance> assetOperation = Addressables.LoadSceneAsync(sceneAddress, mode);
-            assetOperation.Completed += obj => OnSceneLoaded(obj, sceneAddress + origin, sceneLoadedCallback);
+            assetOperation.Completed += obj => OnSceneLoaded(obj, sceneAddress + origin, setSceneActive, sceneLoadedCallback);
         }
 
-        private void OnSceneLoaded(AsyncOperationHandle<SceneInstance> obj, string sceneAddress, Action sceneLoadedCallback = null)
+        private void OnSceneLoaded(
+            AsyncOperationHandle<SceneInstance> obj,
+            string sceneAddress,
+            bool setSceneActive = false,
+            Action sceneLoadedCallback = null)
         {
             if (obj.Status == AsyncOperationStatus.Succeeded)
             {
                 Debug.Log("Scene successfully loaded!");
                 sceneLoadedCallback?.Invoke();
+                if (setSceneActive) SceneManager.SetActiveScene(obj.Result.Scene);
                 sceneLoaded.Add(sceneAddress, obj);
             }
             else

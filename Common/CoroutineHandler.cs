@@ -1,19 +1,12 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityServiceLocator;
 
 namespace GameCore
 {
-    public class CoroutineHandler : MonoBehaviour
+    public class CoroutineHandler : Singleton<CoroutineHandler>
     {
         private Dictionary<string, IEnumerator> runningCoroutines = new();
-
-        private void OnEnable()
-        {
-            ServiceLocator.Global.Register(this);
-        }
 
         public IEnumerator StartHandlerCoroutine(string key, IEnumerator routine)
         {

@@ -1,14 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityServiceLocator;
 
 namespace GameCore
 {
-    public class AudioManager : MonoBehaviour
+    public class AudioManager : Singleton<AudioManager>
     {
-        public static AudioManager instance { get; private set; }
-
         [SerializeField] private List<AudioClip> audioClips;
         [SerializeField] private int poolSize = 10;
 
@@ -19,25 +17,8 @@ namespace GameCore
 
         private CoroutineHandler coroutineHandler;
 
-        private void OnEnable()
-        {
-            ServiceLocator.Global.Register(this);
-
-            coroutineHandler = ServiceLocator.For(this).Get<CoroutineHandler>();
-        }
-
         private void Awake()
         {
-            if (instance == null)
-            {
-                instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-                return;
-            }
-
             foreach (var clip in audioClips)
             {
                 _audioClipDictionary[clip.name] = clip;
@@ -53,11 +34,16 @@ namespace GameCore
             }
         }
 
+        private void OnEnable()
+        {
+            coroutineHandler ??= CoroutineHandler.Instance;
+        }
+
         public void Play(string clipName, bool playLoop = false)
         {
             if (!_audioClipDictionary.ContainsKey(clipName))
             {
-                Debug.LogError($"Audio clip {clipName} not found");
+                Debug.LogError($"Audio clip {clipName} not found. Audio is skipped.");
                 return;
             }
 

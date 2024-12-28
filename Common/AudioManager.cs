@@ -15,6 +15,8 @@ namespace GameCore
         private readonly Dictionary<string, AudioSource> _playingAudiosource = new();
         private Queue<AudioSource> _audioPool;
 
+        public float MasterVolume { get; set; }
+
         private CoroutineHandler coroutineHandler;
 
         private void Awake()

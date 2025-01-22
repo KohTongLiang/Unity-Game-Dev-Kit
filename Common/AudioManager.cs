@@ -10,6 +10,8 @@ namespace GameCore
         [SerializeField] private List<AudioClip> audioClips;
         [SerializeField] private int poolSize = 10;
 
+        public float MasterVolume = 1f;
+
         private readonly Dictionary<string, AudioClip> _audioClipDictionary = new();
         private readonly Dictionary<string, IEnumerator> _playingAudios = new();
         private readonly Dictionary<string, AudioSource> _playingAudiosource = new();
@@ -64,7 +66,7 @@ namespace GameCore
             }
 
             audioSource.clip = _audioClipDictionary[clipName];
-            audioSource.volume = 1f;
+            audioSource.volume = MasterVolume;
             audioSource.loop = playLoop;
             audioSource.Play();
 

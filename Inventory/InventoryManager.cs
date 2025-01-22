@@ -6,6 +6,7 @@ namespace GameCore
     public class InventoryManager
     {
         private readonly List<Item> _tempItemList = new();
+        public List<Item> TempItemList => _tempItemList;
         public Action<Item> OnReceiveItemCallback { get; set; }
         public Action<Item> OnRemoveItemCallback { get; set; }
 

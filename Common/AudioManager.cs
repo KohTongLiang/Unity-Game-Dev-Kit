@@ -1,14 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityServiceLocator;
 
 namespace GameCore
 {
-    public class AudioManager : MonoBehaviour
+    public class AudioManager : Singleton<AudioManager>
     {
-        public static AudioManager instance { get; private set; }
-
         [SerializeField] private List<AudioClip> audioClips;
         [SerializeField] private int poolSize = 10;
 
@@ -17,27 +15,13 @@ namespace GameCore
         private readonly Dictionary<string, AudioSource> _playingAudiosource = new();
         private Queue<AudioSource> _audioPool;
 
+        private List<AudioSource> registeredAudio = new();
+        public float MasterVolume = 1f;
+
         private CoroutineHandler coroutineHandler;
-
-        private void OnEnable()
-        {
-            ServiceLocator.Global.Register(this);
-
-            coroutineHandler = ServiceLocator.For(this).Get<CoroutineHandler>();
-        }
 
         private void Awake()
         {
-            if (instance == null)
-            {
-                instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-                return;
-            }
-
             foreach (var clip in audioClips)
             {
                 _audioClipDictionary[clip.name] = clip;
@@ -53,11 +37,16 @@ namespace GameCore
             }
         }
 
+        private void OnEnable()
+        {
+            coroutineHandler ??= CoroutineHandler.Instance;
+        }
+
         public void Play(string clipName, bool playLoop = false)
         {
             if (!_audioClipDictionary.ContainsKey(clipName))
             {
-                Debug.LogError($"Audio clip {clipName} not found");
+                Debug.LogError($"Audio clip {clipName} not found. Audio is skipped.");
                 return;
             }
 
@@ -106,6 +95,38 @@ namespace GameCore
             _playingAudios.Remove(clipName);
             _playingAudiosource.Remove(clipName);
             _audioPool.Enqueue(audioSource);
+        }
+
+        /// <summary>
+        /// Public API for setting master volume of all the audio sources.
+        /// </summary>
+        /// <param name="volume"></param>
+        public void SetMasterVolume (float volume)
+        {
+            MasterVolume = volume;
+            foreach (var source in registeredAudio)
+            {
+                source.volume = volume;
+            }
+        }
+
+        public void PlayLocalAudio(AudioSource audio, bool loop = false)
+        {
+            audio.volume = MasterVolume;
+            if (audio.isPlaying) return;
+
+            if (loop)
+            {
+                registeredAudio.Add(audio);
+            }
+            audio.loop = loop;
+            audio.Play();
+        }
+
+        public void StopLocalAudio(AudioSource audio)
+        {
+            registeredAudio.Remove(audio);
+            audio.Stop();
         }
     }
 }

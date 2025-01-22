@@ -1,19 +1,17 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityServiceLocator;
 
 namespace GameCore
 {
-    public class CoroutineHandler : MonoBehaviour
+    public class CoroutineHandler : Singleton<CoroutineHandler>
     {
         private Dictionary<string, IEnumerator> runningCoroutines = new();
 
-        private void OnEnable()
-        {
-            ServiceLocator.Global.Register(this);
-        }
+        #if UNITY_EDITOR
+        public List<string> DebugRunningCoroutines => runningCoroutines.Keys.ToList();
+        #endif
 
         public IEnumerator StartHandlerCoroutine(string key, IEnumerator routine)
         {
@@ -26,6 +24,24 @@ namespace GameCore
             StartCoroutine(RunCoroutine(key, routine));
             runningCoroutines.Add(key, routine);
             return routine;
+        }
+
+        /// <summary>
+        /// Starts a coroutine if it is not already running. Returns whether coroutine was started.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="routine"></param>
+        /// <returns></returns>
+        public bool StartCoroutineIfNotRunning(string key, IEnumerator routine)
+        {
+            if (runningCoroutines.ContainsKey(key))
+            {
+                return false;
+            }
+
+            StartCoroutine(RunCoroutine(key, routine));
+            runningCoroutines.Add(key, routine);
+            return true;
         }
 
         public void StopHandlerCoroutine(string key)

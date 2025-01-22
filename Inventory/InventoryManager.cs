@@ -32,5 +32,10 @@ namespace GameCore
         {
             return _tempItemList.Exists(item => item.itemAssetId == assetIds);
         }
+
+        public void Clear()
+        {
+            _tempItemList.Clear();
+        }
     }
 }

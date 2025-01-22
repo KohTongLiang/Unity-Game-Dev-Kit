@@ -47,6 +47,22 @@ namespace GameCore
             }
         }
 
+        public void TriggerEvent(string eventName)
+        {
+            if (_eventDictionary.TryGetValue(eventName, out var thisEvent))
+            {
+                List<object> invokeQueue = new(thisEvent);
+
+                foreach (var action in invokeQueue)
+                {
+                    if (action is Action typedAction)
+                    {
+                        typedAction.Invoke();
+                    }
+                }
+            }
+        }
+
         public void TriggerEvent<T>(string eventName, T eventParam)
         {
             if (_eventDictionary.TryGetValue(eventName, out var thisEvent))

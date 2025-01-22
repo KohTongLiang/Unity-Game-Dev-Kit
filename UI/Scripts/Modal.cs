@@ -31,7 +31,7 @@ namespace GameCore.UI
 
         protected override void OnEnable()
         {
-            coroutines = ServiceLocator.For(this).Get<CoroutineHandler>();
+            coroutines = CoroutineHandler.Instance;
             _modalPath = Directory + "modal.uxml";
             GameContentContainer ??= UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
             _ = coroutines.StartHandlerCoroutine(GetHashCode().ToString(), RunAssetLoading());

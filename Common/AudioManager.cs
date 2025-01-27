@@ -18,7 +18,6 @@ namespace GameCore
         private Queue<AudioSource> _audioPool;
 
         private List<AudioSource> registeredAudio = new();
-        public float MasterVolume = 1f;
 
         private CoroutineHandler coroutineHandler;
 

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using GameCore;
 using UnityEngine;
 
 namespace GameCore
@@ -24,7 +23,7 @@ namespace GameCore
             materials.CopyTo(newMaterials, 0);
             newMaterials[^1] = outlineMaterial;
             mesh.materials = newMaterials;
-            meshes.Add(id, mesh);
+            meshes.TryAdd(id, mesh);
         }
 
         public void ApplyOutlineShader(string id, SkinnedMeshRenderer mesh)
@@ -35,32 +34,52 @@ namespace GameCore
             materials.CopyTo(newMaterials, 0);
             newMaterials[^1] = outlineMaterial;
             mesh.materials = newMaterials;
-            skinMeshes.Add(id, mesh);
+            skinMeshes.TryAdd(id, mesh);
         }
 
         public void ApplyOutlineShader(string id, MeshRenderer[] mesh)
         {
-            foreach (var m in mesh) ApplyOutlineShader(m.name, m);
+            foreach (var m in mesh) ApplyOutlineShader(id + m.name, m);
         }
 
         public void ApplyOutlineShader(string id, SkinnedMeshRenderer[] mesh)
         {
-            foreach (var m in mesh) ApplyOutlineShader(m.name, m);
+            foreach (var m in mesh) ApplyOutlineShader(id + m.name, m);
+        }
+
+        public void RemoveOutlineShader(string id, MeshRenderer[] mesh)
+        {
+            foreach (var m in mesh) RemoveOutlineShader(id + m.name);
+        }
+
+        public void RemoveOutlineShader(string id, SkinnedMeshRenderer[] mesh)
+        {
+            foreach (var m in mesh) RemoveOutlineShader(id + m.name);
         }
 
         public void RemoveOutlineShader(string id)
         {
-            if (!meshes.TryGetValue(id, out var mesh)) return;
-
-            var materials = mesh.materials;
-            var newMaterials = new Material[materials.Length - 1];
-            for (int i = 0; i < newMaterials.Length; i++)
+            if (meshes.TryGetValue(id, out var mesh))
             {
-                newMaterials[i] = materials[i];
+                var materials = mesh.materials;
+                var newMaterials = new Material[materials.Length - 1];
+                for (var i = 0; i < newMaterials.Length; i++) newMaterials[i] = materials[i];
+
+                mesh.materials = newMaterials;
+
+                meshes.Remove(id);
             }
 
-            mesh.materials = newMaterials;
-            meshes.Remove(id);
+            if (skinMeshes.TryGetValue(id, out var skinMesh))
+            {
+                var materials = skinMesh.materials;
+                var newMaterials = new Material[materials.Length - 1];
+                for (var i = 0; i < newMaterials.Length; i++) newMaterials[i] = materials[i];
+
+                skinMesh.materials = newMaterials;
+
+                skinMeshes.Remove(id);
+            }
         }
     }
 }

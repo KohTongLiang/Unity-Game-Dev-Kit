@@ -99,7 +99,7 @@ namespace GameCore
 
         // Make a circular gizmos
         #if UNITY_EDITOR
-        private void OnDrawGizmos()
+        private void OnDrawGizmosSelected()
         {
             Gizmos.color = waypointType == WaypointType.Start ? Color.green : Color.red;
             Gizmos.DrawWireSphere(transform.position, 1f);

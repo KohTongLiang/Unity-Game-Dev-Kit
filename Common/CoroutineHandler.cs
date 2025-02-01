@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace GameCore
 {
@@ -17,7 +16,6 @@ namespace GameCore
         {
             if (runningCoroutines.TryGetValue(key, out var coroutine))
             {
-                Debug.LogWarning($"Coroutine with key {key} is already running. Shutting it down now.");
                 StopHandlerCoroutine(key);
             }
 
@@ -46,15 +44,9 @@ namespace GameCore
 
         public void StopHandlerCoroutine(string key)
         {
-            if (runningCoroutines.TryGetValue(key, out IEnumerator coroutine))
-            {
-                StopCoroutine(coroutine);
-                runningCoroutines.Remove(key);
-            }
-            else
-            {
-                Debug.LogWarning($"Coroutine with key {key} is not running.");
-            }
+            if (!runningCoroutines.TryGetValue(key, out IEnumerator coroutine)) return;
+            StopCoroutine(coroutine);
+            runningCoroutines.Remove(key);
         }
 
         public void StopAllHandlerCoroutines()

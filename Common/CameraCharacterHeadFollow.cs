@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace GameCore
@@ -9,6 +8,7 @@ namespace GameCore
 
         private void Update()
         {
+            if (armatureHead == null) return;
             transform.position = armatureHead.position;
         }
     }

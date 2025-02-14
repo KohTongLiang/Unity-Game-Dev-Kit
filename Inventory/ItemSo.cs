@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace GameCore
 {
@@ -7,15 +6,16 @@ namespace GameCore
     public class ItemSo : ScriptableObject
     {
         [Header("Basic Item Information")]
-        public string itemAssetId; // id in editor mode, at runtime a ulong is generated
-        public string itemName;
-        public string itemDescription;
-        public GameObject itemPrefab;
+        public int ItemAssetId;
+        public string ItemAssetIdName;
+        public string ItemName;
+        public string ItemDescription;
+        public GameObject ItemPrefab;
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         private void OnValidate()
         {
-            itemAssetId = this.name;
+            ItemAssetId = ItemAssetIdName.ComputeFNV1aHash();
             UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif

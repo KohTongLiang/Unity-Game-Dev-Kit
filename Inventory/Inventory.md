@@ -21,6 +21,12 @@ The workflow essentially has two paths:
 
 wip
 
+## Equipment
+
+---
+
+Simple equipment bar system that can be used to complement Inventory System.
+
 
 ## Item Factory
 

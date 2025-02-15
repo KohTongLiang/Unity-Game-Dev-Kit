@@ -11,65 +11,54 @@ namespace GameCore
         public event ItemReceivedEvent OnReceiveItem;
         public event ItemRemovedEvent OnRemoveItem;
 
-        // The lookup table for the individual items
-        private Dictionary<int, Item> itemList = new();
 
         // Lookup table organised by the asset id of the items. Each entry conatains a set
-        // of unique item Ids for each asset id. An asset Id could be like "Potion", and each id
-        // could represent an instance of the poition.
-        private Dictionary<int, HashSet<int>> itemIdsByAssetId = new();
-
+        // of unique item Ids for each asset id. An asset Id could be like "Potion", and each item
+        // represents an instance of the "Potion".
+        private Dictionary<int, Dictionary<int, Item>> itemDictionary = new();
 
         public void ReceiveItem(Item item)
         {
-            if (itemList.TryGetValue(item.ItemRuntimeId, out var itemExist) && itemExist) return;
-            itemList.Add(item.ItemRuntimeId, item);
-
-            if (itemIdsByAssetId.TryGetValue(item.ItemAssetId, out var ids))
+            if (itemDictionary.TryGetValue(item.ItemAssetId, out var ids))
             {
-                ids.Add(item.ItemAssetId);
+                // Update existing dictionary
+                ids.Add(item.ItemRuntimeId, item);
+                itemDictionary[item.ItemAssetId] = ids;
             }
             else
             {
-                itemIdsByAssetId.Add(item.ItemAssetId, new HashSet<int> { item.ItemAssetId });
+                // Create new dictionary entry
+                itemDictionary.Add(item.ItemAssetId, new Dictionary<int, Item> { { item.ItemRuntimeId, item } });
             }
 
             OnReceiveItem?.Invoke(item);
         }
 
-        public Item RemoveItemById(int runtimeId)
+        public void RemoveItem(Item item)
         {
-            var item = itemList[runtimeId];
-            itemList.Remove(runtimeId);
-            if (itemIdsByAssetId.TryGetValue(item.ItemAssetId, out var ids))
+            if (itemDictionary.TryGetValue(item.ItemAssetId, out var ids))
             {
                 ids.Remove(item.ItemRuntimeId);
-                if (ids.Count == 0) itemIdsByAssetId.Remove(item.ItemAssetId);
+                if (ids.Count == 0) itemDictionary.Remove(item.ItemAssetId);
+                else itemDictionary[item.ItemAssetId] = ids;
             }
-            OnRemoveItem?.Invoke(item);
-            return item;
-        }
+            else
+            {
+                return;
+            }
 
-        /// <summary>
-        /// Attempts to retrieve an item from the inventory.
-        /// </summary>
-        /// <param name="itemId">The runtime id of the item.</param>
-        /// <param name="item">Returns a Item.</param>
-        /// <returns></returns>
-        public bool TryGetItemById (int itemId, out Item item)
-        {
-            return itemList.TryGetValue(itemId, out item);
+            OnRemoveItem?.Invoke(item);
         }
 
         /// <summary>
         /// Attempts to retrieve a HashSet of item ids from the inventory.
         /// </summary>
         /// <param name="assetId">Asset Id.</param>
-        /// <param name="itemIds">Returns a HashSet<int> with the item ids inside</param>
+        /// <param name="items"></param>
         /// <returns></returns>
-        public bool TryGetItemsByAssetId(int assetId, out HashSet<int> itemIds)
+        public bool TryGetItemsByAssetId(int assetId, out Dictionary<int, Item> items)
         {
-            return itemIdsByAssetId.TryGetValue(assetId, out itemIds);
+            return itemDictionary.TryGetValue(assetId, out items);
         }
 
         /// <summary>
@@ -79,30 +68,39 @@ namespace GameCore
         /// <returns></returns>
         public int GetQuantityOfAssetItem(int assetId)
         {
-            if (!itemIdsByAssetId.ContainsKey(assetId))
+            if (!itemDictionary.TryGetValue(assetId, value: out var value))
             {
                 Debug.LogWarning($"Asset Id {assetId} not found");
                 return 0;
             }
-            return itemIdsByAssetId[assetId].Count;
-        }
-
-        public bool CheckItemExist(int assetId)
-        {
-            return itemList.ContainsKey(assetId);
+            return value.Count;
         }
 
         /// <summary>
-        /// Purge inventory system
+        /// Check if item is already in the Inventory
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool CheckItemExist(Item item)
+        {
+            return itemDictionary.TryGetValue(item.ItemAssetId, out var value) && value.ContainsKey(item.ItemRuntimeId);
+        }
+
+        /// <summary>
+        /// Purge inventory.
         /// </summary>
         public void Clear()
         {
-            foreach (var inventoryDatastoreValue in itemList.Values)
+            foreach (var inventoryDatastoreValue in itemDictionary.Values)
             {
-                OnRemoveItem?.Invoke(inventoryDatastoreValue);
+                foreach (var item in inventoryDatastoreValue.Values)
+                {
+                    OnRemoveItem?.Invoke(item);
+                }
+                inventoryDatastoreValue.Clear();
             }
 
-            itemList.Clear();
+            itemDictionary.Clear();
         }
     }
 }

@@ -28,6 +28,16 @@ namespace GameCore
             }
 
             _equippables.Remove(equippable);
+
+            if (_equippables.Count == 0)
+            {
+                equipped = false;
+                _currentEquippableIndex = 0;
+            }
+            else if (_currentEquippableIndex >= _equippables.Count)
+            {
+                _currentEquippableIndex = _equippables.Count - 1;
+            }
         }
 
         /// <summary>
@@ -77,14 +87,14 @@ namespace GameCore
 
         private void UnEquipCurrent()
         {
-            if (!equipped) return;
+            if (!equipped || _equippables.Count <= 0) return;
             _equippables[_currentEquippableIndex].UnEquip();
             equipped = false;
         }
 
         private void EquipCurrent()
         {
-            if (equipped) return;
+            if (equipped || _equippables.Count <= 0) return;
             _equippables[_currentEquippableIndex].Equip();
             equipped = true;
         }
@@ -109,6 +119,7 @@ namespace GameCore
 
         public void Clear()
         {
+            equipped = false;
             _currentEquippableIndex = 0;
             _equippables.Clear();
         }

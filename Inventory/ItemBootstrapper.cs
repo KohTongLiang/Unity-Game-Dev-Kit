@@ -17,7 +17,7 @@ namespace GameCore
 
         public void SpawnItem()
         {
-            ItemFactory.Instance.CreateItem(itemBlueprint, transform.position);
+            ItemFactory.Instance.CreateItem<Item>(itemBlueprint, transform.position);
         }
     }
 }

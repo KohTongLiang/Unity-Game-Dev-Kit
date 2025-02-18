@@ -6,6 +6,7 @@ namespace GameCore
     public class ItemFactory : Singleton<ItemFactory>
     {
         private readonly Dictionary<int, int> itemTracker = new();
+        private readonly Dictionary<int, Dictionary<int, GameObject>> itemDictionary = new();
 
         /// <summary>
         /// Asks the factory to instantiate a new instance of an Item
@@ -13,7 +14,7 @@ namespace GameCore
         /// <param name="itemBlueprint"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        public Item CreateItem(ItemSo itemBlueprint, Vector3 position)
+        public T CreateItem<T>(ItemSo itemBlueprint, Vector3 position) where T : Item
         {
             int generatedId;
             if (itemTracker.TryGetValue(itemBlueprint.ItemAssetId, out var count))
@@ -26,12 +27,22 @@ namespace GameCore
                 itemTracker.Add(itemBlueprint.ItemAssetId, 1);
             }
 
-            var item = Instantiate(itemBlueprint.ItemPrefab).GetComponent<Item>();
+            var item = Instantiate(itemBlueprint.ItemPrefab).GetComponent<T>();
             item.ItemRuntimeId = generatedId;
             item.ItemAssetId = itemBlueprint.ItemAssetId;
             item.ItemName = itemBlueprint.ItemName;
             item.ItemDescription = itemBlueprint.ItemDescription;
             item.transform.position = position;
+
+            if (itemDictionary.TryGetValue(item.ItemAssetId, out var items))
+            {
+                items.Add(item.ItemRuntimeId, item.gameObject);
+            }
+            else
+            {
+                itemDictionary[item.ItemAssetId] = new Dictionary<int, GameObject> { { item.ItemRuntimeId, item.gameObject } };
+            }
+
             return item;
         }
 
@@ -50,6 +61,25 @@ namespace GameCore
                 item.ItemRuntimeId = 0;
                 itemTracker.Add(item.ItemAssetId, 1);
             }
+
+            if (itemDictionary.TryGetValue(item.ItemAssetId, out var items))
+            {
+                items.Add(item.ItemRuntimeId, item.gameObject);
+            }
+            else
+            {
+                itemDictionary[item.ItemAssetId] = new Dictionary<int, GameObject> { { item.ItemRuntimeId, item.gameObject } };
+            }
+        }
+
+        public GameObject RetrieveItemObject(Item item)
+        {
+            if (!itemDictionary.TryGetValue(item.ItemAssetId, out var value))
+            {
+                return null;
+            }
+
+            return value.GetValueOrDefault(item.ItemRuntimeId);
         }
     }
 }

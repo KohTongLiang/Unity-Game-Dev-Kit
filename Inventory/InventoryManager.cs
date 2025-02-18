@@ -102,5 +102,18 @@ namespace GameCore
 
             itemDictionary.Clear();
         }
+
+        public List<T> RetrieveAllItems<T>() where T : Item
+        {
+            var items = new List<T>();
+            foreach (var inventoryDatastoreValue in itemDictionary.Values)
+            {
+                foreach (var item in inventoryDatastoreValue.Values)
+                {
+                    items.Add(item as T);
+                }
+            }
+            return items;
+        }
     }
 }

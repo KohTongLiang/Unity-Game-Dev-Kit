@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace GameCore
 {
+    [Serializable]
     public class Item : MonoBehaviour
     {
         [Header("Do not set here, runtime assigned")]
@@ -25,6 +27,7 @@ namespace GameCore
 
         private void OnValidate()
         {
+            if (Application.isPlaying) return;
             ItemRuntimeId = -1;
             ItemAssetId = ItemAssetIdName.ComputeFNV1aHash();
             UnityEditor.EditorUtility.SetDirty(this);

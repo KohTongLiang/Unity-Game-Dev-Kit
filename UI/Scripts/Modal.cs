@@ -33,7 +33,7 @@ namespace GameCore.UI
             coroutines = CoroutineHandler.Instance;
             _modalPath = Directory + "modal.uxml";
             GameContentContainer ??= UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
-            _ = coroutines.StartHandlerCoroutine(GetHashCode().ToString(), RunAssetLoading());
+            _ = coroutines.StartCoroutineIfNotRunning(GetHashCode().ToString(), RunAssetLoading());
         }
 
         private IEnumerator RunAssetLoading()
@@ -43,6 +43,11 @@ namespace GameCore.UI
 
             if (assetOperation.Status == AsyncOperationStatus.Succeeded)
             {
+                while (coroutines.IsCoroutineRunning("CloseModal"))
+                {
+                    yield return null;
+                }
+
                 modalAsset = assetOperation.Result;
                 var modalTemplate = modalAsset.Instantiate();
                 UIComponent = modalTemplate.contentContainer;
@@ -52,7 +57,7 @@ namespace GameCore.UI
 
                 GameContentContainer.Add(UIComponent);
                 modal = UIComponent.Q<VisualElement>("Modal");
-                _ = coroutines.StartHandlerCoroutine("CloseModal", AnimateModal(true));
+                _ = coroutines.StartCoroutineIfNotRunning("OpenModal", OpenModal());
 
                 if (modalStyleSheet != null)
                 {
@@ -89,28 +94,38 @@ namespace GameCore.UI
             modalContent.Add(childAsset);
         }
 
-        private IEnumerator AnimateModal(bool show)
+        private IEnumerator OpenModal()
         {
+            while (coroutines.IsCoroutineRunning("CloseModal"))
+            {
+                yield return null;
+            }
+
             yield return new WaitForSeconds(0.01f);
-            if (show)
+            modal.style.translate = new Translate(0f, 0f, 0f);
+            yield return transitionDelay;
+            _modalMask.RegisterCallback<ClickEvent>(CloseModal);
+        }
+
+        private IEnumerator CloseModal()
+        {
+            while (coroutines.IsCoroutineRunning("OpenModal"))
             {
-                modal.style.translate = new Translate(0f, 0f, 0f);
-                yield return transitionDelay;
-                _modalMask.RegisterCallback<ClickEvent>(CloseModal);
+                yield return null;
             }
-            else
-            {
-                modal.style.translate = new Translate(0f, new Length(300, LengthUnit.Percent), 0f);
-                yield return transitionDelay;
-                GameContentContainer.Remove(UIComponent);
-                Addressables.Release(assetOperation);
-            }
+
+            yield return new WaitForSeconds(0.01f);
+            modal.style.translate = new Translate(0f, new Length(300, LengthUnit.Percent), 0f);
+            yield return transitionDelay;
+            GameContentContainer.Remove(UIComponent);
+            Addressables.Release(assetOperation);
         }
 
         protected virtual void UnloadModalContent()
         {
+            modal.styleSheets.Clear();
             _modalMask.UnregisterCallback<ClickEvent>(CloseModal);
-            _ = coroutines.StartHandlerCoroutine("CloseModal", AnimateModal(false));
+            _ = coroutines.StartCoroutineIfNotRunning("CloseModal", CloseModal());
             modalAsset = null;
         }
 

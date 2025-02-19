@@ -57,7 +57,14 @@ namespace GameCore.UI
         public void ShowComponent(string componentName, bool show = true)
         {
             var component = Components.Find(p => p.name == componentName);
+            if (show && component.activeSelf) return;
             component.SetActive(show);
+        }
+
+        public bool IsComponentVisible(string componentName)
+        {
+            var component = Components.Find(p => p.name == componentName);
+            return component.activeSelf;
         }
     }
 }

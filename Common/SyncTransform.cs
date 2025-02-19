@@ -4,7 +4,7 @@ namespace GameCore
 {
     public class SyncTransform : MonoBehaviour
     {
-        [SerializeField] private Transform targetTransform;
+        public Transform targetTransform;
         [SerializeField] private bool SyncRotation;
         [SerializeField] private bool SyncPosition;
         [SerializeField] private bool SyncScale;

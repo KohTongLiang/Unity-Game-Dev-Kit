@@ -81,5 +81,17 @@ namespace GameCore
 
             return value.GetValueOrDefault(item.ItemRuntimeId);
         }
+
+        public void ClearAllItems()
+        {
+            foreach (var itemDict in itemDictionary.Values)
+            {
+                foreach (var itemObj in itemDict.Values) Destroy(itemObj.gameObject);
+                itemDict.Clear();
+            }
+
+            itemDictionary.Clear();
+            itemTracker.Clear();
+        }
     }
 }

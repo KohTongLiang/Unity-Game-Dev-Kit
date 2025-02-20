@@ -117,6 +117,8 @@ namespace GameCore
             }
         }
 
+        public List<IEquippable> GetAllEquipments() => _equippables;
+
         public void Clear()
         {
             equipped = false;

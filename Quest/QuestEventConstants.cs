@@ -4,6 +4,7 @@ namespace GameCore
     {
         public const string ObjectiveWaypointEvent = "ObjectiveWaypointEvent";
         public const string StartQuestEvent = "StartQuestEvent";
+        public const string EndQuestEvent = "EndQuestEvent";
         public const string PickUpItemEvent = "PickUpItemEvent";
         public const string DeliveredItemEvent = "DeliveredItemEvent";
         

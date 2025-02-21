@@ -20,6 +20,7 @@ namespace GameCore
             if (itemTracker.TryGetValue(itemBlueprint.ItemAssetId, out var count))
             {
                 generatedId = count++;
+                itemTracker[itemBlueprint.ItemAssetId] = count;
             }
             else
             {

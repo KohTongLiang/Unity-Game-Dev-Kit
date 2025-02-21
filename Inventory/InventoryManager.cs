@@ -115,5 +115,16 @@ namespace GameCore
             }
             return items;
         }
+
+        public int GetItemCount()
+        {
+            int count = 0;
+            foreach (var itemDict in itemDictionary.Values)
+            {
+                count += itemDict.Count;
+            }
+
+            return count;
+        }
     }
 }

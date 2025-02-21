@@ -14,7 +14,7 @@ namespace GameCore
     public class QuestSo : ScriptableObject
     {
         [NonSerialized] public bool isInitialized = false;
-        [NonSerialized] public ulong questId;
+        [NonSerialized] public Guid questId;
         
         [Header("Basic Quest Information")]
         public string questAssetId; // id in editor mode, at runtime a ulong is generated
@@ -37,8 +37,9 @@ namespace GameCore
             questObj = Instantiate(questPrefab);
             var quest = questObj.GetComponent<Quest>();
 
+            questId = Guid.NewGuid();
             // Setup quest information
-            quest.QuestId = questAssetId;
+            quest.QuestId = questId;
             quest.PreRequisites = preRequisites.Select(pre => pre.questAssetId).ToArray();
             quest.CurrentQuestState = preRequisites.Length > 0 ? QuestState.Locked : QuestState.Unlocked;
             quest.questTitle = questTitle;

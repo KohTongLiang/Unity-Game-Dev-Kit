@@ -7,7 +7,7 @@ namespace GameCore
     public class Quest : MonoBehaviour
     {
         // Basic quest information
-        public string QuestId;
+        public Guid QuestId;
         public QuestState CurrentQuestState;
         public string questTitle;
         public string questDescription;
@@ -65,7 +65,7 @@ namespace GameCore
 
             CurrentQuestState = QuestState.InProgress;
             
-            EventManager.Instance.TriggerEvent(QuestEventConstants.UpdateQuestUIInfoEvent, this);
+            EventManager.Instance.TriggerEvent(QuestEventConstants.StartQuestEvent, QuestId);
 
             SetupQuestObjectives();
         }
@@ -75,14 +75,14 @@ namespace GameCore
             _objectiveStep = 0;
             foreach (var qObj in ObjectivesList)
             {
-                qObj.InitialiseObjective(QuestId);
+                qObj.InitialiseObjective(this);
                 qObj.ObjectiveCompleteCallback += UpdateQuestObjectiveCallback;
                 qObj.ObjectiveStepUpdateCallback += UpdateObjectiveStepCallback;
             }
 
             if (_objectiveStep < ObjectivesList.Count)
             {
-                ObjectivesList[_objectiveStep].InitialiseObjective(QuestId);
+                ObjectivesList[_objectiveStep].InitialiseObjective(this);
             }
 
             questUpdateCallback?.Invoke(this);
@@ -99,12 +99,13 @@ namespace GameCore
             if (_objectiveStep < ObjectivesList.Count)
             {
                 // Setup next objective(s)
-                ObjectivesList[_objectiveStep].InitialiseObjective(QuestId);
+                ObjectivesList[_objectiveStep].InitialiseObjective(this);
                 questUpdateCallback?.Invoke(this);
             }
             else
             {
                 // Complete the quest once all objectives are met
+                questUpdateCallback?.Invoke(this);
                 EndQuest();
             }
         }
@@ -129,8 +130,9 @@ namespace GameCore
                 qObj.ObjectiveStepUpdateCallback -= UpdateObjectiveStepCallback;
             }
 
+            EventManager.Instance.TriggerEvent(QuestEventConstants.EndQuestEvent, QuestId);
             EventManager.Instance.TriggerEvent(QuestEventConstants.ClearUIEvent, 0);
-            questUpdateCallback?.Invoke(this);
+            questUpdateCallback = null;
             Debug.Log("End Quest");
         }
     }

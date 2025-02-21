@@ -1,5 +1,4 @@
 using System;
-using DeliveryGame;
 using UnityEngine;
 
 namespace GameCore
@@ -18,7 +17,7 @@ namespace GameCore
         public QuestObjectiveState ObjectiveState = QuestObjectiveState.Inactive;
         public Action ObjectiveCompleteCallback;
         public Action ObjectiveStepUpdateCallback;
-        public string questId;
+        public Guid questId;
 
         public int questObjectiveCount;
         protected int _questObjectiveIndex;
@@ -38,10 +37,10 @@ namespace GameCore
             ObjectiveDescription = objectiveDescription;
         }
 
-        public virtual void InitialiseObjective(string questAssetId)
+        public virtual void InitialiseObjective(Quest quest)
         {
             ObjectiveState = QuestObjectiveState.Active;
-            questId = questAssetId;
+            this.questId = quest.QuestId;
         }
 
         /// <summary>

@@ -67,10 +67,12 @@ namespace GameCore
         {
             if (callback.Persistent)
             {
+                if (!_persistentCallbacks.Contains(callback)) return;
                 _persistentCallbacks.Remove(callback);
             }
             else
             {
+                if (!_callbacks.Contains(callback)) return;
                 _callbacks.Remove(callback);
             }
 

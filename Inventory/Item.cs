@@ -11,7 +11,7 @@ namespace GameCore
         public int ItemAssetId;
 
         [Header("Configuration for Item here if not using Scriptable Object")]
-        [SerializeField] private bool registerOnAwake = false;
+        [SerializeField] protected bool registerOnAwake = false;
         public string ItemAssetIdName;
         public string ItemName;
         public string ItemDescription;

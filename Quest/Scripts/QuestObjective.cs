@@ -17,7 +17,7 @@ namespace GameCore
         public QuestObjectiveState ObjectiveState = QuestObjectiveState.Inactive;
         public Action ObjectiveCompleteCallback;
         public Action ObjectiveStepUpdateCallback;
-        public Guid questId;
+        public int questId;
 
         public int questObjectiveCount;
         protected int _questObjectiveIndex;

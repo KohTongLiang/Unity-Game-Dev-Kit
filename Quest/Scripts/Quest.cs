@@ -7,7 +7,7 @@ namespace GameCore
     public class Quest : MonoBehaviour
     {
         // Basic quest information
-        public Guid QuestId;
+        public int QuestId;
         public QuestState CurrentQuestState;
         public string questTitle;
         public string questDescription;

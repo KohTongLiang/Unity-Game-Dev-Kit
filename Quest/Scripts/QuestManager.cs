@@ -8,13 +8,13 @@ namespace GameCore
     public class QuestManager : Singleton<QuestManager>
     {
         // Stores all the quests available during the game runtime
-        private readonly Dictionary<Guid, Quest> _questMap = new();
-        public Dictionary<Guid, Quest> QuestMap => _questMap;
+        private readonly Dictionary<int, Quest> _questMap = new();
+        public Dictionary<int, Quest> QuestMap => _questMap;
 
-        private readonly Dictionary<Guid, Quest> _activeQuests = new();
-        public Dictionary<Guid, Quest> ActiveQuests => _activeQuests;
+        private readonly Dictionary<int, Quest> _activeQuests = new();
+        public Dictionary<int, Quest> ActiveQuests => _activeQuests;
 
-        private readonly Dictionary<Guid, GameObject> questObjList = new();
+        private readonly Dictionary<int, GameObject> questObjList = new();
 
         public delegate void QuestStartedEvent(Quest quest);
         public QuestStartedEvent OnQuestStarted;
@@ -73,7 +73,7 @@ namespace GameCore
 
         public Quest GetQuest(object questId)
         {
-            if (questId is not Guid questIdStr) return null;
+            if (questId is not int questIdStr) return null;
             _questMap.TryGetValue(questIdStr, out var quest);
             if (quest != null)
             {
@@ -108,7 +108,7 @@ namespace GameCore
             OnQuestEnded?.Invoke(quest);
         }
 
-        public void StartQuest(Guid questId, Action<Quest> questUpdateCallback)
+        public void StartQuest(int questId, Action<Quest> questUpdateCallback)
         {
             _questMap.TryGetValue(questId, out var quest);
             if (quest != null)
@@ -116,11 +116,10 @@ namespace GameCore
                 quest.questUpdateCallback += questUpdateCallback;
                 quest.questUpdateCallback += QuestUpdated;
                 quest.StartQuest();
-                OnQuestStarted?.Invoke(quest);
             }
         }
 
-        public void EndQuest(Guid questId)
+        public void EndQuest(int questId)
         {
             if (!_questMap.TryGetValue(questId, out var questInfo)) return;
 

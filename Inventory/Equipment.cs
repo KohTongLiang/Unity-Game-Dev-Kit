@@ -13,6 +13,7 @@ namespace GameCore
 
         // Whether equipments are equipped.
         private bool equipped = false;
+        public bool Equipped => equipped;
 
         public void AddEquippable(IEquippable equippable)
         {

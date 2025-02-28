@@ -52,6 +52,7 @@ namespace GameCore
         {
             ActiveQuests.Clear();
             _questMap.Clear();
+            questObjList.Clear();
         }
 
         public void QuestUpdateCallback(Quest quest)

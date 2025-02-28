@@ -87,6 +87,21 @@ namespace GameCore
         }
 
         /// <summary>
+        /// Query item from Inventory by runtime id.
+        /// </summary>
+        /// <param name="assetId">Item's asset id to retrieve the correcy lookup.</param>
+        /// <param name="runtimeId">Item's runtime id.</param>
+        /// <param name="item">Output item</param>
+        public void GetItemByRuntimeId(int assetId, int runtimeId, out Item item)
+        {
+            if (itemDictionary.TryGetValue(assetId, out var value) && value.TryGetValue(runtimeId, out item))
+            {
+                return;
+            }
+            item = null;
+        }
+
+        /// <summary>
         /// Purge inventory.
         /// </summary>
         public void Clear()

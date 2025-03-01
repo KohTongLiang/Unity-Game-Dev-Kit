@@ -16,12 +16,28 @@ namespace GameCore
         public string ItemName;
         public string ItemDescription;
 
+        [Header("Blueprint Reference")]
+        public ItemSo ItemBlueprint;
+
         protected virtual void Awake()
         {
             if (registerOnAwake)
             {
                 ItemFactory.Instance.RegisterItem(this);
+                UpdateItemAssetDetailsFromBlueprint();
             }
+        }
+
+        /// <summary>
+        /// Update the item asset details from blueprint attached to the item. This is for items
+        /// that are added directly into the scene instead of being created from the factory.
+        /// </summary>
+        public void UpdateItemAssetDetailsFromBlueprint()
+        {
+            ItemAssetId = ItemBlueprint.ItemAssetId;
+            ItemAssetIdName = ItemBlueprint.ItemAssetIdName;
+            ItemName = ItemBlueprint.ItemName;
+            ItemDescription = ItemBlueprint.ItemDescription;
         }
 
         #if UNITY_EDITOR

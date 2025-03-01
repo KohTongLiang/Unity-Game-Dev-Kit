@@ -54,9 +54,9 @@ namespace GameCore
         /// Attempts to retrieve a HashSet of item ids from the inventory.
         /// </summary>
         /// <param name="assetId">Asset Id.</param>
-        /// <param name="items"></param>
+        /// <param name="items">Pass by reference the lookup for the items.</param>
         /// <returns></returns>
-        public bool TryGetItemsByAssetId(int assetId, out Dictionary<int, Item> items)
+        public bool TryGetItemsByAssetId(int assetId, ref Dictionary<int, Item> items)
         {
             return itemDictionary.TryGetValue(assetId, out items);
         }

@@ -7,14 +7,15 @@ namespace GameCore
 {
     public class QuestManager : Singleton<QuestManager>
     {
+        [Header("Folder in Resource folder where Quests Scriptable Objects are Stored")]
+        [SerializeField] private string questPath = "Quests";
+
         // Stores all the quests available during the game runtime
         private readonly Dictionary<int, Quest> _questMap = new();
         public Dictionary<int, Quest> QuestMap => _questMap;
 
         private readonly Dictionary<int, Quest> _activeQuests = new();
         public Dictionary<int, Quest> ActiveQuests => _activeQuests;
-
-        private readonly Dictionary<int, GameObject> questObjList = new();
 
         public delegate void QuestStartedEvent(Quest quest);
         public QuestStartedEvent OnQuestStarted;
@@ -25,6 +26,11 @@ namespace GameCore
         public delegate void QuestUpdatedEvent(Quest quest);
         public QuestUpdatedEvent OnQuestUpdated;
 
+        private void Start()
+        {
+            LoadQuests();
+        }
+
         private void CreateQuestDictionary()
         {
             // loads all QuestInfoSO Scriptable Objects under the Assets/Resources/Quests folder
@@ -33,11 +39,9 @@ namespace GameCore
             // Create the quest map
             foreach (QuestSo questInfo in allQuests)
             {
-                Quest quest = questInfo.CreateQuest(out var questObj);
-                questObjList.Add(quest.QuestId, questObj);
-
+                Quest quest = questInfo.CreateQuest();
                 quest.InitialiseQuest(this);
-                _questMap.TryAdd(questInfo.questId, quest);
+                _questMap.TryAdd(quest.QuestId, quest);
             }
 
             Debug.Log($"There are {_questMap.Count} quests loaded");
@@ -59,7 +63,7 @@ namespace GameCore
 
         }
 
-        #region QuestHelpers
+        #region Runtime Quest Utilities
 
         /// <summary>
         /// Query pre-requisite quests for completion
@@ -108,7 +112,7 @@ namespace GameCore
             OnQuestEnded?.Invoke(quest);
         }
 
-        public void StartQuest(int questId, Action<Quest> questUpdateCallback)
+        public void StartQuest(int questId, Action<Quest> questUpdateCallback = null)
         {
             _questMap.TryGetValue(questId, out var quest);
             if (quest != null)
@@ -116,20 +120,21 @@ namespace GameCore
                 quest.questUpdateCallback += questUpdateCallback;
                 quest.questUpdateCallback += QuestUpdated;
                 quest.StartQuest();
+                OnQuestStarted?.Invoke(quest);
             }
         }
 
         public void EndQuest(int questId)
         {
             if (!_questMap.TryGetValue(questId, out var questInfo)) return;
-
-            if (questObjList.TryGetValue(questInfo.QuestId, out var questObj))
-            {
-                Destroy(questObj);
-                questObjList.Remove(questInfo.QuestId);
-            }
-
             questInfo.EndQuest();
+        }
+
+        public void GetQuestObjective(int questId, int objectiveId, ref QuestObjective objective)
+        {
+            _questMap.TryGetValue(questId, out var quest);
+            if (quest == null) return;
+            quest.GetObjective(objectiveId, ref objective);
         }
 
         #endregion

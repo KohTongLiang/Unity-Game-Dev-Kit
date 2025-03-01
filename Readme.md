@@ -1,6 +1,16 @@
 # Game Core
 
-Template for quick game development
+Framework for quick game development
+
+## Systems
+
+- Common Datastore and Event Manager
+- Behaviour Tree
+- Audio Manager
+- Highlighter
+- Game Director for Missions and Quests
+- Inventory and Equipments
+- Random GameObject utility such as billboard, oscillation, rotation.
 
 ## Dependencies at the moment
 

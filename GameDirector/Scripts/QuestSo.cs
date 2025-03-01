@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace GameCore
 {
@@ -10,18 +8,17 @@ namespace GameCore
     /// At start time, QuestManager will retrieve all the Quest Scriptable Objects and generate a quest instance for
     /// each of it.
     /// </summary>
-    [CreateAssetMenu(fileName = "Quest", menuName = "ScriptableObjects/Quest", order = 1)]
+    [CreateAssetMenu(fileName = "Quest", menuName = "GameDirector/Quest", order = 1)]
     public class QuestSo : ScriptableObject
     {
         [NonSerialized] public bool isInitialized = false;
-        [NonSerialized] public int questId;
-        
+        [NonSerialized] public int QuestId;
+
         [Header("Basic Quest Information")]
         public string questAssetId; // id in editor mode, at runtime a ulong is generated
         public string questTitle;
         public string questDescription;
-        public GameObject questPrefab;
-        
+
         [Header("Quest pre-requisites")]
         public QuestSo[] preRequisites;
 
@@ -32,24 +29,24 @@ namespace GameCore
         /// Create a instance of the quest during runtime for the Quest Manager.
         /// </summary>
         /// <returns>Quest instance based on this quest Scriptable</returns>
-        public Quest CreateQuest(out GameObject questObj)
+        public Quest CreateQuest()
         {
-            questObj = Instantiate(questPrefab);
-            var quest = questObj.GetComponent<Quest>();
-
-            questId = questTitle.ComputeFNV1aHash();
-            // Setup quest information
-            quest.QuestId = questId;
-            quest.PreRequisites = preRequisites.Select(pre => pre.questAssetId).ToArray();
-            quest.CurrentQuestState = preRequisites.Length > 0 ? QuestState.Locked : QuestState.Unlocked;
-            quest.questTitle = questTitle;
-            quest.questDescription = questDescription;
-            quest.ObjectivesList = new();
+            QuestId = questTitle.ComputeFNV1aHash();
+            var quest = new Quest
+            {
+                // Setup quest information
+                QuestId = QuestId,
+                PreRequisites = preRequisites.Select(pre => pre.questAssetId).ToArray(),
+                CurrentQuestState = preRequisites.Length > 0 ? QuestState.Locked : QuestState.Unlocked,
+                questTitle = questTitle,
+                questDescription = questDescription,
+                ObjectivesDictionary = new(),
+            };
 
             foreach (var questObjSo in objectivesPrefab)
             {
-                QuestObjective newObj = questObjSo.CreateQuestObjective(questObj);
-                quest.ObjectivesList.Add(newObj);
+                QuestObjective newObj = questObjSo.CreateQuestObjective();
+                quest.ObjectivesDictionary.Add(newObj.ObjectiveId, newObj);
             }
 
             return quest;

@@ -27,7 +27,8 @@ namespace GameCore
             }
 
             EditorGUILayout.LabelField("Active Quests");
-            foreach (var quest in manager.ActiveQuests.Values)
+            var activeQuests = manager.ActiveQuests; // Copy to prevent runtime modification error
+            foreach (var quest in activeQuests.Values)
             {
                 GUILayout.Label(quest.questTitle);
                 if (GUILayout.Button("End"))

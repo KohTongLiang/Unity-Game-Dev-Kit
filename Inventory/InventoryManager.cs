@@ -62,6 +62,17 @@ namespace GameCore
         }
 
         /// <summary>
+        /// Attempts to retrieve a HashSet of item ids from the inventory.
+        /// </summary>
+        /// <param name="assetId">Asset Id.</param>
+        /// <param name="items">Pass by reference the lookup for the items.</param>
+        /// <returns></returns>
+        public int GetItemCountByAssetId(int assetId)
+        {
+            return itemDictionary.TryGetValue(assetId, out var items) ? items.Count : 0;
+        }
+
+        /// <summary>
         /// Get the quantity of an item in player inventory.
         /// </summary>
         /// <param name="assetId"></param>

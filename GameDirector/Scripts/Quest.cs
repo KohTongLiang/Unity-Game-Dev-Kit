@@ -64,6 +64,7 @@ namespace GameCore
 
             // Start the first objective
             ObjectivesDictionary.Values.ToList()[0]?.StartObjective();
+            OnQuestStart?.Invoke(this);
         }
 
         private void OnObjectiveStarted(int objectiveId)
@@ -116,6 +117,7 @@ namespace GameCore
             CurrentQuestState = QuestState.Completed;
             _objectiveStep = 0;
             _questManager.RemoveActiveQuests(this);
+            questUpdateCallback?.Invoke(this);
             questUpdateCallback = null;
         }
     }

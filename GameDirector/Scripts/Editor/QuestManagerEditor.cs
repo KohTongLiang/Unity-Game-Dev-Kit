@@ -20,7 +20,6 @@ namespace GameCore
 
             if (!Application.isPlaying || manager == null) return;
 
-
             if (GUILayout.Button("Load Quests"))
             {
                 manager.LoadQuests();
@@ -31,6 +30,12 @@ namespace GameCore
             foreach (var quest in activeQuests.Values)
             {
                 GUILayout.Label(quest.questTitle);
+
+                foreach (var objective in quest.ObjectivesDictionary.Values)
+                {
+                    GUILayout.Label($"\t{objective.ObjectiveTitle} {objective.ObjectiveState}");
+                }
+
                 if (GUILayout.Button("End"))
                 {
                     manager.EndQuest(quest.QuestId);

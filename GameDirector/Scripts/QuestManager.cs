@@ -26,11 +26,6 @@ namespace GameCore
         public delegate void QuestUpdatedEvent(Quest quest);
         public QuestUpdatedEvent OnQuestUpdated;
 
-        private void Start()
-        {
-            LoadQuests();
-        }
-
         private void CreateQuestDictionary()
         {
             // loads all QuestInfoSO Scriptable Objects under the Assets/Resources/Quests folder

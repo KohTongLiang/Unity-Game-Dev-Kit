@@ -89,6 +89,7 @@ namespace GameCore
         private void UnEquipCurrent()
         {
             if (!equipped || _equippables.Count <= 0) return;
+            if (_currentEquippableIndex >= _equippables.Count) return;
             _equippables[_currentEquippableIndex].UnEquip();
             equipped = false;
         }
@@ -96,13 +97,15 @@ namespace GameCore
         private void EquipCurrent()
         {
             if (equipped || _equippables.Count <= 0) return;
+            if (_currentEquippableIndex >= _equippables.Count) return;
             _equippables[_currentEquippableIndex].Equip();
             equipped = true;
         }
 
         public void UseCurrent()
         {
-            if (!equipped) return;
+            if (!equipped || _equippables.Count <= 0) return;
+            if (_currentEquippableIndex >= _equippables.Count) return;
             _equippables[_currentEquippableIndex].Use();
         }
 

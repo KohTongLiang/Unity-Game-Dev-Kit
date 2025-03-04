@@ -54,11 +54,22 @@ namespace GameCore
         /// Attempts to retrieve a HashSet of item ids from the inventory.
         /// </summary>
         /// <param name="assetId">Asset Id.</param>
-        /// <param name="items"></param>
+        /// <param name="items">Pass by reference the lookup for the items.</param>
         /// <returns></returns>
-        public bool TryGetItemsByAssetId(int assetId, out Dictionary<int, Item> items)
+        public bool TryGetItemsByAssetId(int assetId, ref Dictionary<int, Item> items)
         {
             return itemDictionary.TryGetValue(assetId, out items);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve a HashSet of item ids from the inventory.
+        /// </summary>
+        /// <param name="assetId">Asset Id.</param>
+        /// <param name="items">Pass by reference the lookup for the items.</param>
+        /// <returns></returns>
+        public int GetItemCountByAssetId(int assetId)
+        {
+            return itemDictionary.TryGetValue(assetId, out var items) ? items.Count : 0;
         }
 
         /// <summary>
@@ -84,6 +95,21 @@ namespace GameCore
         public bool CheckItemExist(Item item)
         {
             return itemDictionary.TryGetValue(item.ItemAssetId, out var value) && value.ContainsKey(item.ItemRuntimeId);
+        }
+
+        /// <summary>
+        /// Query item from Inventory by runtime id.
+        /// </summary>
+        /// <param name="assetId">Item's asset id to retrieve the correcy lookup.</param>
+        /// <param name="runtimeId">Item's runtime id.</param>
+        /// <param name="item">Output item</param>
+        public void GetItemByRuntimeId(int assetId, int runtimeId, out Item item)
+        {
+            if (itemDictionary.TryGetValue(assetId, out var value) && value.TryGetValue(runtimeId, out item))
+            {
+                return;
+            }
+            item = null;
         }
 
         /// <summary>

@@ -44,6 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3be049f6def34b58892abba8af1a6b68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemAssetId: 
-  itemName: 
-  itemDescription: 
+  ItemRuntimeId: -1
+  ItemAssetId: -2128831035
+  registerOnAwake: 0
+  ItemAssetIdName: 
+  ItemName: 
+  ItemDescription: 
+  ItemBlueprint: {fileID: 0}

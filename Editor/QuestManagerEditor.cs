@@ -8,6 +8,8 @@ namespace GameCore
     public class QuestManagerEditor : Editor
     {
         private QuestManager manager;
+        private Quest questRef;
+
         public override VisualElement CreateInspectorGUI()
         {
             manager = target as QuestManager;
@@ -33,7 +35,7 @@ namespace GameCore
 
                 foreach (var objective in quest.ObjectivesDictionary.Values)
                 {
-                    GUILayout.Label($"\t{objective.ObjectiveTitle} {objective.ObjectiveState}");
+                    GUILayout.Label($"\t{objective.ObjectiveTitle} {objective.ObjectiveState} {objective.ObjectiveRepeatCount} {objective.CurrentObjectiveCount}");
                 }
 
                 if (GUILayout.Button("End"))
@@ -49,7 +51,7 @@ namespace GameCore
                 GUILayout.Label(quest.questTitle);
                 if (GUILayout.Button("Start"))
                 {
-                    manager.StartQuest(quest.QuestId, null);
+                    manager.StartQuest(quest.QuestId, ref questRef, null);
                 }
             }
         }

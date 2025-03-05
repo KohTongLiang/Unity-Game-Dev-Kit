@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace GameCore
@@ -107,16 +108,18 @@ namespace GameCore
             OnQuestEnded?.Invoke(quest);
         }
 
-        public void StartQuest(int questId, Action<Quest> questUpdateCallback = null)
+        public bool StartQuest(int questId, ref Quest quest, Action<Quest> questUpdateCallback = null)
         {
-            _questMap.TryGetValue(questId, out var quest);
-            if (quest != null)
+            if (_questMap.TryGetValue(questId, out quest) && quest.CurrentQuestState != QuestState.InProgress)
             {
                 quest.questUpdateCallback += questUpdateCallback;
                 quest.questUpdateCallback += QuestUpdated;
                 quest.StartQuest();
                 OnQuestStarted?.Invoke(quest);
+                return true;
             }
+
+            return false;
         }
 
         public void EndQuest(int questId)

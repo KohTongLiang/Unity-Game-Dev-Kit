@@ -5,12 +5,12 @@ namespace GameCore
     public static class LayerUtilities
     {
         /// <summary>
-        /// Pass in a Layer mask and a object layer to determine if they are on the
-        /// same layer. Returns True if on same layer, False otheriwse.
+        /// Determines if an object layer is included in the specified layer mask.
+        /// Returns true if included, false otherwise.
         /// </summary>
-        /// <param name="mask">LayerMask input</param>
-        /// <param name="objectLayer">GameObject layer</param>
-        /// <returns></returns>
+        /// <param name="mask">The layer mask to check against.</param>
+        /// <param name="objectLayer">The layer of the object.</param>
+        /// <returns>True if the object layer is in the mask, false otherwise.</returns>
         public static bool CompareLayerToMask(LayerMask mask, int objectLayer)
         {
             return (mask & (1 << objectLayer)) != 0;

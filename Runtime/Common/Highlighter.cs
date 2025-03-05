@@ -61,6 +61,12 @@ namespace GameCore
         {
             if (meshes.TryGetValue(id, out var mesh))
             {
+                if (mesh == null)
+                {
+                    meshes.Remove(id);
+                    return;
+                }
+
                 var materials = mesh.materials;
                 var newMaterials = new Material[materials.Length - 1];
                 for (var i = 0; i < newMaterials.Length; i++) newMaterials[i] = materials[i];

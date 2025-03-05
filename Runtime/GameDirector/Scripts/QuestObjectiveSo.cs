@@ -15,7 +15,10 @@ namespace GameCore
         public string QuestObjectiveAssetId;
         public string ObjectiveTitle;
         public string ObjectiveDescription;
-        public int ObjectiveCount;
+
+        [Min(0)]
+        [Tooltip("The number of times, this objectives need to be repeated for it to be counted as complete. Can be set to 0 if its set dynamically.")]
+        public int ObjectiveRepeatCount;
         
         public QuestObjective CreateQuestObjective()
         {
@@ -26,7 +29,8 @@ namespace GameCore
                 ObjectiveId = QuestObjectiveId,
                 ObjectiveTitle = ObjectiveTitle,
                 ObjectiveDescription = ObjectiveDescription,
-                QuestObjectiveCount = ObjectiveCount
+                ObjectiveRepeatCount = ObjectiveRepeatCount,
+                Blueprint = this
             };
 
             return newObj;

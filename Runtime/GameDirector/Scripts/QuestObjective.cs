@@ -14,10 +14,12 @@ namespace GameCore
         public string ObjectiveTitle;
         public string ObjectiveDescription;
         public QuestState ObjectiveState;
+        public QuestObjectiveSo Blueprint;
 
-        public int QuestObjectiveCount;
-        protected int _questObjectiveIndex;
-        public Quest parentQuest;
+        public int ObjectiveRepeatCount;
+
+        protected int currentObjectiveCount;
+        public int CurrentObjectiveCount => currentObjectiveCount;
 
         public delegate void OnObjectiveInitialisedEvent(int QuestObjectiveId);
         public delegate void OnObjectiveStartEvent(int QuestObjectiveId);
@@ -33,8 +35,9 @@ namespace GameCore
 
         public virtual void InitialiseObjective(Quest quest)
         {
+            ObjectiveRepeatCount = Blueprint.ObjectiveRepeatCount;
+            currentObjectiveCount = 0;
             ObjectiveState = QuestState.Unlocked;
-            parentQuest = quest;
             OnObjectiveInitialised?.Invoke(ObjectiveId);
         }
 
@@ -49,7 +52,7 @@ namespace GameCore
             }
 
             ObjectiveState = QuestState.InProgress;
-            _questObjectiveIndex = QuestObjectiveCount;
+            currentObjectiveCount = 0;
             OnObjectiveStart?.Invoke(ObjectiveId);
         }
 
@@ -59,10 +62,17 @@ namespace GameCore
         public virtual void UpdateObjective()
         {
             OnObjectiveUpdate?.Invoke(ObjectiveId);
+
+            // Update and check repeat count, if reached then completed
+            currentObjectiveCount++;
+            if (currentObjectiveCount >= ObjectiveRepeatCount)
+            {
+                CompleteObjective();
+            }
         }
 
         /// <summary>
-        /// Fired when objective is completed
+        /// Fired when objective failed.
         /// </summary>
         public virtual void FailObjective()
         {

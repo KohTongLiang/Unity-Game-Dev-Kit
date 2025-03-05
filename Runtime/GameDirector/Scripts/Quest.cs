@@ -96,6 +96,29 @@ namespace GameCore
             questUpdateCallback?.Invoke(this);
         }
 
+        private void ClearQuestObjectives()
+        {
+            foreach (var qObj in ObjectivesDictionary.Values)
+            {
+                qObj.OnObjectiveStart -= OnObjectiveStarted;
+                qObj.OnObjectiveCompleted -= OnObjectiveCompleted;
+            }
+        }
+
+        /// <summary>
+        /// Dynamically update quest objective's repeat count.
+        /// </summary>
+        /// <param name="objectiveId"></param>
+        public void UpdateObjectiveCount(int objectiveId)
+        {
+            if (ObjectivesDictionary.TryGetValue(objectiveId, out var objective))
+            {
+                objective.ObjectiveRepeatCount++;
+                questUpdateCallback?.Invoke(this);
+                ObjectivesDictionary[objectiveId] = objective;
+            }
+        }
+
         private bool CheckQuestComplete()
         {
             foreach (var objective in ObjectivesDictionary.Values)
@@ -114,6 +137,7 @@ namespace GameCore
         /// </summary>
         public void EndQuest()
         {
+            ClearQuestObjectives();
             CurrentQuestState = QuestState.Completed;
             _objectiveStep = 0;
             _questManager.RemoveActiveQuests(this);

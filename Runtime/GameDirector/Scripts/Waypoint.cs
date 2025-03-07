@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityServiceLocator;
 
 namespace GameCore
 {
@@ -27,7 +28,7 @@ namespace GameCore
 
         protected virtual void OnEnable()
         {
-            QuestManager = QuestManager.Instance;
+            QuestManager = ServiceLocator.For(this).Get<QuestManager>();
         }
 
         protected virtual void OnDisable()

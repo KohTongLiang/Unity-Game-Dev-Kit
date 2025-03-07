@@ -9,9 +9,10 @@ namespace GameCore
         [SerializeField] private Transform playerView;
         public Transform InteractorView => playerView;
 
+        [NonSerialized] public float CurrentInteractableInView;
         [NonSerialized] public PlayerInteractable CurrentInteractable;
 
-        public virtual void Interact()
+        public void Interact()
         {
             CurrentInteractable.Interact();
         }

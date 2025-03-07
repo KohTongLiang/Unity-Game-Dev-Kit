@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityServiceLocator;
 
 namespace GameCore
 {
@@ -26,6 +27,11 @@ namespace GameCore
 
         public delegate void QuestUpdatedEvent(Quest quest);
         public QuestUpdatedEvent OnQuestUpdated;
+
+        private void Awake()
+        {
+            ServiceLocator.Global.Register(this);
+        }
 
         private void CreateQuestDictionary()
         {

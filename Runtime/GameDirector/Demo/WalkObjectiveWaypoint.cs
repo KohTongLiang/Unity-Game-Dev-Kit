@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityServiceLocator;
 
 namespace GameCore
 {
@@ -11,7 +12,7 @@ namespace GameCore
 
         private void Start()
         {
-            QuestManager = QuestManager.Instance;
+            QuestManager = ServiceLocator.For(this).Get<QuestManager>();
             QuestManager.OnQuestStarted += OnQuestStarted;
         }
 

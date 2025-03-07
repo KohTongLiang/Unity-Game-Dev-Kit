@@ -2,18 +2,33 @@
 
 namespace GameCore
 {
-    public class PlayerInteractable : MonoBehaviour, IPickable, IInteractable
+    public class PlayerInteractable : MonoBehaviour, IHover, IInteractable
     {
-        [SerializeField] private LayerMask targetMask;
+        [SerializeField] private LayerMask interactorMask;
         [SerializeField] private float maxDistance = 2f;
+        [SerializeField] private float dotProductThreshold = 0.5f;
+
+        public bool persistent = false;
         public bool interactable = true;
 
         private PlayerInteractor interactor;
+        public PlayerInteractor Interactor => interactor;
+
         private bool hovered = false;
+
+        public delegate void OnHoverEnterEvent();
+        public delegate void OnHoverLeaveEvent();
+        public delegate void OnInteractEvent();
+
+        public event OnHoverEnterEvent OnHoverEnterTrigger;
+        public event OnHoverLeaveEvent OnHoverLeaveTrigger;
+        public event OnInteractEvent OnInteractTrigger;
+
+        private float dotProduct;
 
         protected virtual void OnTriggerEnter(Collider other)
         {
-            if (LayerUtilities.CompareLayerToMask(targetMask, other.gameObject.layer) && interactable)
+            if (LayerUtilities.CompareLayerToMask(interactorMask, other.gameObject.layer) && interactable)
             {
                 interactor = other.gameObject.GetComponent<PlayerInteractor>();
             }
@@ -21,7 +36,7 @@ namespace GameCore
 
         protected virtual void OnTriggerExit(Collider other)
         {
-            if (LayerUtilities.CompareLayerToMask(targetMask, other.gameObject.layer) && interactable)
+            if (LayerUtilities.CompareLayerToMask(interactorMask, other.gameObject.layer) && interactable)
             {
                 interactor = other.gameObject.GetComponent<PlayerInteractor>();
                 OnHoverLeave();
@@ -33,8 +48,9 @@ namespace GameCore
             if (interactor is null) return;
             var direction = transform.position - interactor.InteractorView.position;
             var distance = direction.magnitude;
-            var dotProduct = Vector3.Dot(direction.normalized, interactor.transform.forward);
-            if (dotProduct > 0.5f && distance < maxDistance) // adjust maxDistance to your needs
+            dotProduct = Vector3.Dot(direction.normalized, interactor.InteractorView.transform.forward);
+
+            if (dotProduct > dotProductThreshold && distance < maxDistance) // adjust maxDistance to your needs
             {
                 OnHover();
             }
@@ -46,29 +62,33 @@ namespace GameCore
 
         public virtual void OnHover()
         {
-            if (hovered) return;
+            bool toSet = interactor.CurrentInteractable == null || interactor.CurrentInteractableInView < dotProduct;
+
+            if (!toSet || hovered) return;
             hovered = true;
-            interactor.CurrentInteractable = this;
+
+            // Override current interactable if
+            if (toSet)
+            {
+                interactor.CurrentInteractableInView = dotProduct;
+                interactor.CurrentInteractable = this;
+            }
+
+            OnHoverEnterTrigger?.Invoke();
         }
 
         public virtual void OnHoverLeave()
         {
             if (!hovered) return;
             hovered = false;
-            interactor.CurrentInteractable = null;
-        }
-
-        public virtual void OnPickup()
-        {
-        }
-
-        public virtual void OnDropped()
-        {
+            interactor.CurrentInteractable = interactor.CurrentInteractable == this ? null : interactor.CurrentInteractable;
+            OnHoverLeaveTrigger?.Invoke();
         }
 
         public virtual void Interact()
         {
-            Debug.Log("Interact");
+            Interactor.CurrentInteractable = persistent ? this : null;
+            OnInteractTrigger?.Invoke();
         }
     }
 }

@@ -16,6 +16,8 @@ namespace GameCore.UI
         private GameObject currentPage { get; set; }
         public UIDocument rootDocument { get; private set; }
 
+        public readonly Datastore Datastore = new Datastore();
+
         private void Awake()
         {
             if (Pages.Count <= 0) return;

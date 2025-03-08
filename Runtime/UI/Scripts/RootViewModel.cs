@@ -38,13 +38,15 @@ namespace GameCore.UI
         protected VisualElement UIComponent;
         protected VisualElement Root, GameContentContainer;
         protected float templateContainerFlexGrow = 1f;
+        protected TemplateContainer container;
 
         public readonly Stack<GameObject> OpenedComponents = new();
 
         protected virtual void OnEnable()
         {
-            GameContentContainer ??= UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
-            UIComponent ??= UIAsset.Instantiate().contentContainer;
+            GameContentContainer = UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
+            container = UIAsset.Instantiate();
+            UIComponent = container.contentContainer;
             UIComponent.style.flexGrow = new StyleFloat(templateContainerFlexGrow);
             GameContentContainer.contentContainer.Add(UIComponent);
         }

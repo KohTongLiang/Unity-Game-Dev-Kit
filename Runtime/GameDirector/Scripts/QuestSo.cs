@@ -36,7 +36,7 @@ namespace GameCore
             {
                 // Setup quest information
                 QuestId = QuestId,
-                PreRequisites = preRequisites.Select(pre => pre.questAssetId).ToArray(),
+                PreRequisites = preRequisites.Select(pre => pre.QuestId).ToArray(),
                 CurrentQuestState = preRequisites.Length > 0 ? QuestState.Locked : QuestState.Unlocked,
                 questTitle = questTitle,
                 questDescription = questDescription,

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityServiceLocator;
 
@@ -11,6 +10,8 @@ namespace GameCore
     {
         [Header("Folder in Resource folder where Quests Scriptable Objects are Stored")]
         [SerializeField] private string questPath = "Quests";
+
+        [SerializeField] private bool loadQuestsOnStart;
 
         // Stores all the quests available during the game runtime
         private readonly Dictionary<int, Quest> _questMap = new();
@@ -31,6 +32,11 @@ namespace GameCore
         private void Awake()
         {
             ServiceLocator.Global.Register(this);
+        }
+
+        private void Start()
+        {
+            if (loadQuestsOnStart) LoadQuests();
         }
 
         private void CreateQuestDictionary()
@@ -57,7 +63,6 @@ namespace GameCore
         public void ClearQuests()
         {
             ActiveQuests.Clear();
-            _questMap.Clear();
         }
 
         public void QuestUpdateCallback(Quest quest)
@@ -72,21 +77,20 @@ namespace GameCore
         /// </summary>
         /// <param name="preRequisiteId"></param>
         /// <returns></returns>
-        public bool QueryPreRequisite(string[] preRequisiteId)
+        public bool QueryPreRequisite(int[] preRequisiteId)
         {
-            return preRequisiteId.All(questId => GetQuest(questId)?.CurrentQuestState == QuestState.Completed);
+            return preRequisiteId.All(questId =>
+            {
+                Quest quest = new();
+                GetQuest(questId, ref quest);
+                return quest?.CurrentQuestState == QuestState.Completed;
+            });
         }
 
-        public Quest GetQuest(object questId)
+        public bool GetQuest(int questId, ref Quest quest)
         {
-            if (questId is not int questIdStr) return null;
-            _questMap.TryGetValue(questIdStr, out var quest);
-            if (quest != null)
-            {
-                return quest;
-            }
-
-            return null;
+            _questMap.TryGetValue(questId, out quest);
+            return quest != null;
         }
 
         public void AddActiveQuests(Quest quest)

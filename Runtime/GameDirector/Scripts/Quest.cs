@@ -23,7 +23,7 @@ namespace GameCore
         public event OnQuestCompletedEvent OnQuestCompleted;
 
         // Pre-Requisites before the quest can be unlocked
-        public string[] PreRequisites;
+        public int[] PreRequisites;
 
         // "Objectives"
         private int _objectiveStep = 0;

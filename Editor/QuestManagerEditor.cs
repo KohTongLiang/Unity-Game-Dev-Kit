@@ -35,7 +35,7 @@ namespace GameCore
 
                 foreach (var objective in quest.ObjectivesDictionary.Values)
                 {
-                    GUILayout.Label($"\t{objective.ObjectiveTitle} {objective.ObjectiveState} {objective.ObjectiveRepeatCount} {objective.CurrentObjectiveCount}");
+                    GUILayout.Label($"\t{objective.ObjectiveTitle} {objective.ObjectiveState} {objective.ObjectiveStepCount} {objective.CurrentObjectiveStep}");
                 }
 
                 if (GUILayout.Button("End"))
@@ -51,7 +51,7 @@ namespace GameCore
                 GUILayout.Label(quest.questTitle);
                 if (GUILayout.Button("Start"))
                 {
-                    manager.StartQuest(quest.QuestId, ref questRef, null);
+                    manager.StartQuest(quest.QuestId, ref questRef);
                 }
             }
         }

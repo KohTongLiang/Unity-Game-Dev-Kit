@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -26,7 +25,7 @@ namespace GameCore
         public delegate void QuestEndedEvent(Quest quest);
         public QuestEndedEvent OnQuestEnded;
 
-        public delegate void QuestUpdatedEvent(Quest quest);
+        public delegate void QuestUpdatedEvent(Quest quest, QuestObjective questObjective);
         public QuestUpdatedEvent OnQuestUpdated;
 
         private void Awake()
@@ -65,11 +64,6 @@ namespace GameCore
             ActiveQuests.Clear();
         }
 
-        public void QuestUpdateCallback(Quest quest)
-        {
-
-        }
-
         #region Runtime Quest Utilities
 
         /// <summary>
@@ -93,6 +87,20 @@ namespace GameCore
             return quest != null;
         }
 
+        /// <summary>
+        /// Retrieve a reference to the quest objective. Function returns false if not found.
+        /// </summary>
+        /// <param name="questId"></param>
+        /// <param name="questObjectiveId"></param>
+        /// <param name="questObjective">Quest Objective reference</param>
+        /// <returns></returns>
+        public bool GetQuestObjective(int questId, int questObjectiveId, ref QuestObjective questObjective)
+        {
+            if (!_questMap.TryGetValue(questId, out var quest)) return false;
+            if (!quest.ObjectivesDictionary.TryGetValue(questObjectiveId, out questObjective)) return false;
+            return questObjective == null;
+        }
+
         public void AddActiveQuests(Quest quest)
         {
             _activeQuests.TryAdd(quest.QuestId, quest);
@@ -101,16 +109,16 @@ namespace GameCore
         public void RemoveActiveQuests(Quest quest)
         {
             _activeQuests.Remove(quest.QuestId);
-            OnQuestUpdated?.Invoke(quest);
         }
 
-        private void QuestUpdated(Quest quest)
+        private void QuestStarted(Quest quest)
         {
-            OnQuestUpdated?.Invoke(quest);
-            if (quest.CurrentQuestState == QuestState.Completed)
-            {
-                QuestEnded(quest);
-            }
+            OnQuestStarted?.Invoke(quest);
+        }
+
+        private void QuestUpdated(Quest quest, QuestObjective questObjective)
+        {
+            OnQuestUpdated?.Invoke(quest, questObjective);
         }
 
         private void QuestEnded(Quest quest)
@@ -118,14 +126,14 @@ namespace GameCore
             OnQuestEnded?.Invoke(quest);
         }
 
-        public bool StartQuest(int questId, ref Quest quest, Action<Quest> questUpdateCallback = null)
+        public bool StartQuest(int questId, ref Quest quest)
         {
             if (_questMap.TryGetValue(questId, out quest) && quest.CurrentQuestState != QuestState.InProgress)
             {
-                quest.questUpdateCallback += questUpdateCallback;
-                quest.questUpdateCallback += QuestUpdated;
+                quest.OnQuestStart += QuestStarted;
+                quest.OnQuestUpdate += QuestUpdated;
+                quest.OnQuestCompleted += QuestEnded;
                 quest.StartQuest();
-                OnQuestStarted?.Invoke(quest);
                 return true;
             }
 
@@ -136,13 +144,6 @@ namespace GameCore
         {
             if (!_questMap.TryGetValue(questId, out var questInfo)) return;
             questInfo.EndQuest();
-        }
-
-        public void GetQuestObjective(int questId, int objectiveId, ref QuestObjective objective)
-        {
-            _questMap.TryGetValue(questId, out var quest);
-            if (quest == null) return;
-            quest.GetObjective(objectiveId, ref objective);
         }
 
         #endregion

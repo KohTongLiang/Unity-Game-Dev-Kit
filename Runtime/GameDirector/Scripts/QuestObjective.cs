@@ -9,23 +9,20 @@ namespace GameCore
     [Serializable]
     public class QuestObjective
     {
-        private ulong _stepId;
         public int ObjectiveId;
         public string ObjectiveTitle;
         public string ObjectiveDescription;
-        public QuestState ObjectiveState;
         public QuestObjectiveSo Blueprint;
 
-        public int ObjectiveRepeatCount;
+        public QuestState ObjectiveState;
+        public int ObjectiveStepCount;
+        public int CurrentObjectiveStep;
 
-        protected int currentObjectiveCount;
-        public int CurrentObjectiveCount => currentObjectiveCount;
-
-        public delegate void OnObjectiveInitialisedEvent(int QuestObjectiveId);
-        public delegate void OnObjectiveStartEvent(int QuestObjectiveId);
-        public delegate void OnObjectiveUpdateEvent(int QuestObjectiveId);
-        public delegate void OnObjectiveFailedEvent(int QuestObjectiveId);
-        public delegate void OnObjectiveCompletedEvent(int QuestObjectiveId);
+        public delegate void OnObjectiveInitialisedEvent(QuestObjective questObjective);
+        public delegate void OnObjectiveStartEvent(QuestObjective questObjective);
+        public delegate void OnObjectiveUpdateEvent(QuestObjective questObjective);
+        public delegate void OnObjectiveFailedEvent(QuestObjective questObjective);
+        public delegate void OnObjectiveCompletedEvent(QuestObjective questObjective);
 
         public event OnObjectiveInitialisedEvent OnObjectiveInitialised;
         public event OnObjectiveStartEvent OnObjectiveStart;
@@ -35,10 +32,10 @@ namespace GameCore
 
         public virtual void InitialiseObjective(Quest quest)
         {
-            ObjectiveRepeatCount = Blueprint.ObjectiveRepeatCount;
-            currentObjectiveCount = 0;
+            ObjectiveStepCount = Blueprint.ObjectiveRepeatCount;
+            CurrentObjectiveStep = 0;
             ObjectiveState = QuestState.Unlocked;
-            OnObjectiveInitialised?.Invoke(ObjectiveId);
+            OnObjectiveInitialised?.Invoke(this);
         }
 
         /// <summary>
@@ -52,8 +49,8 @@ namespace GameCore
             }
 
             ObjectiveState = QuestState.InProgress;
-            currentObjectiveCount = 0;
-            OnObjectiveStart?.Invoke(ObjectiveId);
+            CurrentObjectiveStep = 0;
+            OnObjectiveStart?.Invoke(this);
         }
 
         /// <summary>
@@ -61,13 +58,15 @@ namespace GameCore
         /// </summary>
         public virtual void UpdateObjective()
         {
-            OnObjectiveUpdate?.Invoke(ObjectiveId);
-
             // Update and check repeat count, if reached then completed
-            currentObjectiveCount++;
-            if (currentObjectiveCount >= ObjectiveRepeatCount)
+            CurrentObjectiveStep++;
+            if (CurrentObjectiveStep >= ObjectiveStepCount)
             {
                 CompleteObjective();
+            }
+            else
+            {
+                OnObjectiveUpdate?.Invoke(this);
             }
         }
 
@@ -77,7 +76,7 @@ namespace GameCore
         public virtual void FailObjective()
         {
             ObjectiveState = QuestState.Failed;
-            OnObjectiveFailed?.Invoke(ObjectiveId);
+            OnObjectiveFailed?.Invoke(this);
         }
 
         /// <summary>
@@ -86,7 +85,7 @@ namespace GameCore
         public virtual void CompleteObjective()
         {
             ObjectiveState = QuestState.Completed;
-            OnObjectiveCompleted?.Invoke(ObjectiveId);
+            OnObjectiveCompleted?.Invoke(this);
         }
     }
 }

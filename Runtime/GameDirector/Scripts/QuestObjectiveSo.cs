@@ -29,7 +29,7 @@ namespace GameCore
                 ObjectiveId = QuestObjectiveId,
                 ObjectiveTitle = ObjectiveTitle,
                 ObjectiveDescription = ObjectiveDescription,
-                ObjectiveRepeatCount = ObjectiveRepeatCount,
+                ObjectiveStepCount = ObjectiveRepeatCount,
                 Blueprint = this
             };
 

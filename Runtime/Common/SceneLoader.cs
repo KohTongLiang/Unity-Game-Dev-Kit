@@ -81,5 +81,16 @@ namespace GameCore
                 Debug.LogError("Failed to unload scene.");
             }
         }
+
+        /// <summary>
+        /// Check if the scene is loaded
+        /// </summary>
+        /// <param name="sceneAddress"></param>
+        /// <param name="origin"></param>
+        /// <returns></returns>
+        public bool IsSceneLoaded(string sceneAddress, string origin)
+        {
+            return sceneLoaded.ContainsKey(sceneAddress + origin);
+        }
     }
 }

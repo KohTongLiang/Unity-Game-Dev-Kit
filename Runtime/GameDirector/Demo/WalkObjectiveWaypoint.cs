@@ -35,7 +35,7 @@ namespace GameCore
             }
         }
 
-        private void OnObjectiveStart(int id)
+        private void OnObjectiveStart(QuestObjective objective)
         {
             Objective.OnObjectiveStart -= OnObjectiveStart;
 
@@ -53,7 +53,7 @@ namespace GameCore
             enabled = false;
         }
 
-        private void OnObjectiveEnd(int id)
+        private void OnObjectiveEnd(QuestObjective objective)
         {
             Objective.OnObjectiveCompleted -= OnObjectiveEnd;
             enabled = false;

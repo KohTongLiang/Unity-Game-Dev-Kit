@@ -29,7 +29,7 @@ namespace GameCore
         /// Create a instance of the quest during runtime for the Quest Manager.
         /// </summary>
         /// <returns>Quest instance based on this quest Scriptable</returns>
-        public Quest CreateQuest()
+        public Quest CreateQuest(QuestManager managerRef)
         {
             QuestId = questTitle.ComputeFNV1aHash();
             var quest = new Quest
@@ -41,11 +41,12 @@ namespace GameCore
                 questTitle = questTitle,
                 questDescription = questDescription,
                 ObjectivesDictionary = new(),
+                QuestManagerRef = managerRef
             };
 
             foreach (var questObjSo in objectivesPrefab)
             {
-                QuestObjective newObj = questObjSo.CreateQuestObjective();
+                QuestObjective newObj = questObjSo.CreateQuestObjective(quest);
                 quest.ObjectivesDictionary.Add(newObj.ObjectiveId, newObj);
             }
 

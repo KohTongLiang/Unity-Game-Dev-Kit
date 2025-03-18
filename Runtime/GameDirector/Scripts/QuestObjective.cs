@@ -18,6 +18,9 @@ namespace GameCore
         public int ObjectiveStepCount;
         public int CurrentObjectiveStep;
 
+        public Quest QuestRef;
+        public QuestObjectiveSo[] ExcludeObjectives;
+
         public delegate void OnObjectiveInitialisedEvent(QuestObjective questObjective);
         public delegate void OnObjectiveStartEvent(QuestObjective questObjective);
         public delegate void OnObjectiveUpdateEvent(QuestObjective questObjective);
@@ -84,6 +87,16 @@ namespace GameCore
         /// </summary>
         public virtual void CompleteObjective()
         {
+            QuestObjective objectiveRef = new();
+            // Fail Excluded Objectives, making them uncompletable
+            foreach (var excludedObjective in ExcludeObjectives)
+            {
+                QuestRef.QuestManagerRef.GetQuestObjective(QuestRef.QuestId, excludedObjective.QuestObjectiveId,
+                    ref objectiveRef);
+                objectiveRef.ObjectiveState = QuestState.Failed;
+            }
+
+            // Complete objective
             ObjectiveState = QuestState.Completed;
             OnObjectiveCompleted?.Invoke(this);
         }

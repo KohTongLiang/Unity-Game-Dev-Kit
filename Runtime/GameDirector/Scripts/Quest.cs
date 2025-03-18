@@ -11,6 +11,8 @@ namespace GameCore
         public string questTitle;
         public string questDescription;
 
+        public QuestManager QuestManagerRef;
+
         public delegate void OnQuestStartEvent(Quest quest);
         public delegate void OnQuestUpdateEvent(Quest quest, QuestObjective objective);
         public delegate void OnQuestFailedEvent(Quest quest);
@@ -91,7 +93,7 @@ namespace GameCore
         {
             foreach (var objective in ObjectivesDictionary.Values)
             {
-                if (objective.ObjectiveState != QuestState.Completed)
+                if (objective.ObjectiveState != QuestState.Completed && objective.ObjectiveState != QuestState.Failed)
                 {
                     return false;
                 }

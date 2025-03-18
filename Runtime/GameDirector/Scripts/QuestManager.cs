@@ -46,7 +46,7 @@ namespace GameCore
             // Create the quest map
             foreach (QuestSo questInfo in allQuests)
             {
-                Quest quest = questInfo.CreateQuest();
+                Quest quest = questInfo.CreateQuest(this);
                 quest.InitialiseQuest(this);
                 _questMap.TryAdd(quest.QuestId, quest);
             }

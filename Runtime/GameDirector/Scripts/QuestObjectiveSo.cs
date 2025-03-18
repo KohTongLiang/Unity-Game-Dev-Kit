@@ -16,11 +16,14 @@ namespace GameCore
         public string ObjectiveTitle;
         public string ObjectiveDescription;
 
+        [Header("Completion of this objectives, fails the following")]
+        public QuestObjectiveSo[] ExcludeObjectives;
+
         [Min(0)]
         [Tooltip("The number of times, this objectives need to be repeated for it to be counted as complete. Can be set to 0 if its set dynamically.")]
         public int ObjectiveRepeatCount;
         
-        public QuestObjective CreateQuestObjective()
+        public QuestObjective CreateQuestObjective(Quest questRef)
         {
             QuestObjectiveId = QuestObjectiveAssetId.ComputeFNV1aHash();
             QuestObjective newObj = new()
@@ -30,7 +33,9 @@ namespace GameCore
                 ObjectiveTitle = ObjectiveTitle,
                 ObjectiveDescription = ObjectiveDescription,
                 ObjectiveStepCount = ObjectiveRepeatCount,
-                Blueprint = this
+                Blueprint = this,
+                ExcludeObjectives = ExcludeObjectives,
+                QuestRef = questRef
             };
 
             return newObj;

@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace GameCore
 {
@@ -21,7 +20,7 @@ namespace GameCore
 
         private Vector3 GetMouseWorldPos()
         {
-            return cam.WorldToScreenPoint(transform.position);
+            return Camera.main.WorldToScreenPoint(transform.position);
         }
 
         private void OnMouseDown()
@@ -37,7 +36,7 @@ namespace GameCore
 
         private void OnMouseDrag()
         {
-            Vector3 newPos = cam.ScreenToWorldPoint(Input.mousePosition - mousePosition);
+            Vector3 newPos = Camera.main.ScreenToWorldPoint(Input.mousePosition - mousePosition);
             transform.position = newPos;
         }
     }

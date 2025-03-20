@@ -12,7 +12,7 @@ namespace GameCore.UI
     {
         #region Callback Binding
 
-        private struct ButtonCallback
+        protected struct ButtonCallback
         {
             public Button button;
             public Action callback;
@@ -24,43 +24,62 @@ namespace GameCore.UI
             }
         }
 
-        private readonly List<ButtonCallback> _buttonCallbacks = new();
-
+        protected readonly List<ButtonCallback> ButtonCallbacks = new();
         private readonly Queue<Action> _callbackQueue = new();
 
         #endregion
 
 
         [SerializeField] protected string pageName;
-
         [SerializeField] protected VisualTreeAsset UIAsset;
+        [SerializeField] protected GameObject[] objectDependents;
 
         protected VisualElement UIComponent;
         protected VisualElement Root, GameContentContainer;
         protected float templateContainerFlexGrow = 1f;
         protected TemplateContainer container;
 
-        public readonly Stack<GameObject> OpenedComponents = new();
+        public readonly Stack<RootViewModel> OpenedComponents = new();
 
-        protected virtual void OnEnable()
+        public bool Active { get; protected set; }
+
+        /// <summary>
+        /// Mount component into UI Hierarchy.
+        /// </summary>
+        public virtual void Mount()
         {
+            Active = true;
             GameContentContainer = UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
             container = UIAsset.Instantiate();
             UIComponent = container.contentContainer;
             UIComponent.style.flexGrow = new StyleFloat(templateContainerFlexGrow);
             GameContentContainer.contentContainer.Add(UIComponent);
+
+            foreach (var obj in objectDependents)
+            {
+                obj.SetActive(true);
+            }
         }
 
-        protected virtual void OnDisable()
+        /// <summary>
+        /// Remove component from UI Hierarchy.
+        /// </summary>
+        public virtual void DisMount()
         {
+            Active = false;
             GameContentContainer.contentContainer.Remove(UIComponent);
             // Clean up callbacks
-            _buttonCallbacks.ForEach(b => b.button.clicked -= b.callback);
+            ButtonCallbacks.ForEach(b => b.button.clicked -= b.callback);
 
             while (_callbackQueue.Count > 0) _callbackQueue.Dequeue().Invoke();
-            while (OpenedComponents.Count > 0) OpenedComponents.Pop().SetActive(false);
+            while (OpenedComponents.Count > 0) OpenedComponents.Pop().DisMount();
 
             UIComponent = null;
+
+            foreach (var obj in objectDependents)
+            {
+                obj.SetActive(false);
+            }
         }
 
         #region Visual Element Bindings
@@ -82,7 +101,7 @@ namespace GameCore.UI
             }
 
             button.clicked += callback;
-            _buttonCallbacks.Add(new ButtonCallback(button, callback));
+            ButtonCallbacks.Add(new ButtonCallback(button, callback));
             return true;
         }
 

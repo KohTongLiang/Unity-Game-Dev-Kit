@@ -168,7 +168,7 @@ namespace GameCore
         /// <summary>
         /// Equips the current item based on the current index.
         /// </summary>
-        private void EquipCurrent()
+        public void EquipCurrent()
         {
             if (equipped || _equippables.Count <= 0) return;
             if (_currentEquippableIndex >= _equippables.Count) return;

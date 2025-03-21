@@ -403,6 +403,7 @@ namespace GameCore
     public class BehaviourTree : Node
     {
         private readonly IPolicy policy;
+        public Node CurrentChild => children[currentChild];
 
         public BehaviourTree(string name, IPolicy policy = null) : base(name)
         {

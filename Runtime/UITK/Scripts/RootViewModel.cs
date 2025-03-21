@@ -2,9 +2,30 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityServiceLocator;
 
 namespace GameCore.UI
 {
+    [Serializable]
+    public class BaseBinding
+    {
+        public string elementId;
+        public string dataKey;
+    }
+
+    [Serializable]
+    public class ButtonBinding : BaseBinding
+    {
+        public enum ButtonType
+        {
+            MountComponent,
+            FireEvents
+        }
+
+        public ButtonType type;
+        public string target;
+    }
+
     /// <summary>
     /// Base layout for view model. It shall reference the UI Asset and automatically look for the element in the UI hierarchy.
     /// </summary>
@@ -29,19 +50,25 @@ namespace GameCore.UI
 
         #endregion
 
+        [Header("Component Bindings")]
+        [SerializeField] private BaseBinding[] labelBinding;
+        [SerializeField] private ButtonBinding[] buttonBinding;
 
+        [Header("Component Config")]
         [SerializeField] protected string pageName;
         [SerializeField] protected VisualTreeAsset UIAsset;
+
+        [Header("Dependencies")]
+        [Tooltip("Bind any game object that should be activated when this component mouts.")]
         [SerializeField] protected GameObject[] objectDependents;
 
         protected VisualElement UIComponent;
-        protected VisualElement Root, GameContentContainer;
+        protected VisualElement GameContentContainer;
         protected float templateContainerFlexGrow = 1f;
         protected TemplateContainer container;
-
         public readonly Stack<RootViewModel> OpenedComponents = new();
-
         public bool Active { get; protected set; }
+        protected UiManager uiManager;
 
         /// <summary>
         /// Mount component into UI Hierarchy.
@@ -49,6 +76,8 @@ namespace GameCore.UI
         public virtual void Mount()
         {
             Active = true;
+            uiManager = ServiceLocator.For(this).Get<UiManager>();
+            if (uiManager == null) return;
             GameContentContainer = UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
             container = UIAsset.Instantiate();
             UIComponent = container.contentContainer;
@@ -58,6 +87,16 @@ namespace GameCore.UI
             foreach (var obj in objectDependents)
             {
                 obj.SetActive(true);
+            }
+
+            foreach (var binding in labelBinding)
+            {
+                BindLabel(binding.elementId, out var _, binding.dataKey);
+            }
+
+            foreach (var binding in buttonBinding)
+            {
+                BindButton(binding.elementId, out var _, () => uiManager.ShowPage(binding.target));
             }
         }
 
@@ -106,7 +145,7 @@ namespace GameCore.UI
         }
 
         /// <summary>
-        ///
+        /// Bind label, passing in callbacks to listen and a callback on dismount.
         /// </summary>
         /// <param name="elementId"></param>
         /// <param name="label"></param>
@@ -127,6 +166,49 @@ namespace GameCore.UI
             if (unListenCallback is not null) _callbackQueue.Enqueue(unListenCallback);
             return true;
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="elementId"></param>
+        /// <param name="label"></param>
+        /// <param name="listenCallback"></param>
+        /// <param name="unListenCallback"></param>
+        /// <returns></returns>
+        protected bool BindLabel(string elementId, out Label outputLabel, string dataKey = "")
+        {
+            Label label = UIComponent.Q<Label>(elementId);
+
+            if (label == null)
+            {
+                Debug.LogError($"Label {elementId}: Not Found.");
+                outputLabel = null;
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(dataKey))
+            {
+                string value = "";
+                uiManager.Datastore.TryGetReference(dataKey, ref value);
+                label.text = value;
+
+                uiManager.Datastore.RegisterCallback<string>(dataKey, UpdateCallback);
+                _callbackQueue.Enqueue(() =>
+                {
+                    uiManager.Datastore.UnregisterCallback<string>(dataKey, UpdateCallback);
+                });
+
+                void UpdateCallback(string value)
+                {
+                    Label label = UIComponent.Q<Label>(elementId);
+                    label.text = value;
+                }
+            }
+
+            outputLabel = label;
+            return true;
+        }
+
 
         /// <summary>
         ///

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityServiceLocator;
 
 namespace GameCore.UI
 {
@@ -11,17 +12,19 @@ namespace GameCore.UI
         public List<RootViewModel> Pages { get; set; }
 
         [field: SerializeField]
-        public List<RootViewModel> Components { get; set; }
+        public List<OverlayViewModel> Overlays { get; set; }
 
         private RootViewModel currentPage { get; set; }
         public UIDocument rootDocument { get; private set; }
 
-        public readonly Datastore Datastore = new Datastore();
+
+        private Datastore datastore = new();
+        public Datastore Datastore => datastore;
 
         private void Awake()
         {
             if (Pages.Count <= 0) return;
-
+            ServiceLocator.Global.Register(this);
             rootDocument = GetComponent<UIDocument>();
             currentPage = Pages[0];
             if (!currentPage.Active) currentPage.Mount();
@@ -46,7 +49,7 @@ namespace GameCore.UI
         /// <param name="show"></param>
         public void ShowComponent(string componentName, RootViewModel source, bool show = true)
         {
-            var component = Components.Find(p => p.name == componentName);
+            var component = Overlays.Find(p => p.name == componentName);
 
             if (show)
             {
@@ -67,7 +70,7 @@ namespace GameCore.UI
         /// <param name="show"></param>
         public void ShowComponent(string componentName, bool show = true)
         {
-            var component = Components.Find(p => p.name == componentName);
+            var component = Overlays.Find(p => p.name == componentName);
             if (show && component.Active) return;
 
             if (show)
@@ -82,7 +85,7 @@ namespace GameCore.UI
 
         public bool IsComponentVisible(string componentName)
         {
-            var component = Components.Find(p => p.name == componentName);
+            var component = Overlays.Find(p => p.name == componentName);
             return component.Active;
         }
     }

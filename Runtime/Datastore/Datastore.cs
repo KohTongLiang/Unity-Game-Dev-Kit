@@ -107,6 +107,29 @@ namespace GameCore
         }
 
         /// <summary>
+        /// Attempt to retrieve a datastore entry via a key, return false if not found, sets out value if found
+        /// </summary>
+        /// <param name="keyName"></param>
+        /// <param name="value"></param>
+        /// <param name="type"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool TryGetReference<T>(string keyName, ref T value, string type = "default")
+        {
+            var key = GetOrRegisterKey(keyName);
+            datastore.TryGetValue(type, out var datastoreEntries);
+            if (datastoreEntries is not null && datastoreEntries.TryGetValue(key, out var entry) &&
+                entry is DatastoreEntity<T> castedEntry)
+            {
+                value = castedEntry.Value;
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
         /// Adds a new entry to datastoreEntries or update existing entry. Returns key for future references.
         /// </summary>
         /// <param name="keyName"></param>

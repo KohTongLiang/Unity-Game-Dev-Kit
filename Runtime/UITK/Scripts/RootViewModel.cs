@@ -6,33 +6,10 @@ using UnityServiceLocator;
 
 namespace GameCore.UI
 {
-    [Serializable]
-    public class BaseBinding
-    {
-        public string elementId;
-        public string dataKey;
-    }
-
-    [Serializable]
-    public class ButtonBinding : BaseBinding
-    {
-        public enum ButtonType
-        {
-            MountComponent,
-            FireEvents
-        }
-
-        public ButtonType type;
-        public string target;
-    }
-
-    /// <summary>
-    /// Base layout for view model. It shall reference the UI Asset and automatically look for the element in the UI hierarchy.
-    /// </summary>
     public class RootViewModel : MonoBehaviour
     {
-        #region Callback Binding
-
+        // Track callbacks attached to elements. When component is dismounted, callbacks are removed to prevent
+        // dangling callbacks
         protected struct ButtonCallback
         {
             public Button button;
@@ -48,15 +25,15 @@ namespace GameCore.UI
         protected readonly List<ButtonCallback> ButtonCallbacks = new();
         private readonly Queue<Action> _callbackQueue = new();
 
-        #endregion
-
-        [Header("Component Bindings")]
-        [SerializeField] private BaseBinding[] labelBinding;
-        [SerializeField] private ButtonBinding[] buttonBinding;
-
         [Header("Component Config")]
+        [SerializeField] protected string mountPoint = "GameContent";
         [SerializeField] protected string pageName;
         [SerializeField] protected VisualTreeAsset UIAsset;
+        [Tooltip("Mount component when this tag exists")] [SerializeField] protected string tag;
+
+        [Header("Component Bindings")]
+        [SerializeField] private LabelBinding[] labelBinding;
+        [SerializeField] private ButtonBinding[] buttonBinding;
 
         [Header("Dependencies")]
         [Tooltip("Bind any game object that should be activated when this component mouts.")]
@@ -70,6 +47,16 @@ namespace GameCore.UI
         public bool Active { get; protected set; }
         protected UiManager uiManager;
 
+        private void Start()
+        {
+            uiManager = ServiceLocator.For(this).Get<UiManager>();
+            uiManager.Datastore.RegisterCallback<string>(tag, value =>
+            {
+                if (!string.IsNullOrEmpty(value)) Mount();
+                else DisMount();
+            });
+        }
+
         /// <summary>
         /// Mount component into UI Hierarchy.
         /// </summary>
@@ -78,7 +65,7 @@ namespace GameCore.UI
             Active = true;
             uiManager = ServiceLocator.For(this).Get<UiManager>();
             if (uiManager == null) return;
-            GameContentContainer = UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>("GameContent");
+            GameContentContainer = UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>(mountPoint);
             container = UIAsset.Instantiate();
             UIComponent = container.contentContainer;
             UIComponent.style.flexGrow = new StyleFloat(templateContainerFlexGrow);
@@ -96,7 +83,24 @@ namespace GameCore.UI
 
             foreach (var binding in buttonBinding)
             {
-                BindButton(binding.elementId, out var _, () => uiManager.ShowPage(binding.target));
+                List<Action> callbacks = new();
+                foreach (var buttonEvent in binding.buttonEvents)
+                {
+                    switch (buttonEvent.type)
+                    {
+                        case ButtonType.MountComponent:
+                            callbacks.Add(() => uiManager.ShowPage(buttonEvent.target));
+                            break;
+                        case ButtonType.FireEvents:
+                            callbacks.Add(() => EventManager.Instance.TriggerEvent(buttonEvent.target));
+                            break;
+                        case ButtonType.WriteDatastore:
+                            callbacks.Add(() => uiManager.Datastore.AddOrUpdate(buttonEvent.dataKey, buttonEvent.target));
+                            break;
+                    }
+                }
+
+                BindButton(binding.elementId, out _, callbacks);
             }
         }
 
@@ -105,7 +109,10 @@ namespace GameCore.UI
         /// </summary>
         public virtual void DisMount()
         {
+            if (!Active) return;
             Active = false;
+            uiManager.Datastore.AddOrUpdate(tag, "");
+
             GameContentContainer.contentContainer.Remove(UIComponent);
             // Clean up callbacks
             ButtonCallbacks.ForEach(b => b.button.clicked -= b.callback);
@@ -141,6 +148,31 @@ namespace GameCore.UI
 
             button.clicked += callback;
             ButtonCallbacks.Add(new ButtonCallback(button, callback));
+            return true;
+        }
+
+        /// <summary>
+        /// Automatically look up button and binds button. Automatically unregister callback on disable.
+        /// </summary>
+        /// <param name="elementId"></param>
+        /// <param name="button"></param>
+        /// <param name="callbacks"></param>
+        /// <returns>Optional Button</returns>
+        protected bool BindButton(string elementId, out Button button, List<Action> callbacks)
+        {
+            button = UIComponent.Q<Button>(elementId);
+            if (button == null)
+            {
+                Debug.LogError($"Button {elementId}: Not Found.");
+                return false;
+            }
+
+            foreach (var action in callbacks)
+            {
+                button.clicked += action;
+                ButtonCallbacks.Add(new ButtonCallback(button, action));
+            }
+
             return true;
         }
 

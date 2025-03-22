@@ -152,8 +152,27 @@ namespace GameCore.UI
         /// <param name="listenCallback"></param>
         /// <param name="unListenCallback"></param>
         /// <returns></returns>
-        protected bool BindLabel(string elementId, out Label label, Action listenCallback = null,
-            Action unListenCallback = null)
+        protected bool BindLabel(string elementId, out Label label)
+        {
+            label = UIComponent.Q<Label>(elementId);
+            if (label == null)
+            {
+                Debug.LogError($"Label {elementId}: Not Found.");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Bind label, passing in callbacks to listen and a callback on dismount.
+        /// </summary>
+        /// <param name="elementId"></param>
+        /// <param name="label"></param>
+        /// <param name="listenCallback"></param>
+        /// <param name="unListenCallback"></param>
+        /// <returns></returns>
+        protected bool BindLabel(string elementId, out Label label, Action listenCallback, Action unListenCallback)
         {
             label = UIComponent.Q<Label>(elementId);
             if (label == null)

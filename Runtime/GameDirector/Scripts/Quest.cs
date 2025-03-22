@@ -26,18 +26,6 @@ namespace GameCore
         // Pre-Requisites before the quest can be unlocked
         public int[] PreRequisites;
 
-        // "Objectives"
-        private int _objectiveStep = 0;
-
-        /// <summary>
-        /// Quest Objective Steps
-        /// </summary>
-        public int ObjectiveStep
-        {
-            get => _objectiveStep;
-            set => _objectiveStep = value;
-        }
-
         public Dictionary<int, QuestObjective> ObjectivesDictionary;
         private QuestManager _questManager;
 
@@ -79,6 +67,7 @@ namespace GameCore
 
         private void OnObjectiveCompleted(QuestObjective objective)
         {
+            ObjectivesDictionary[objective.ObjectiveId] = objective;
             if (CheckQuestComplete())
             {
                 EndQuest();
@@ -108,13 +97,17 @@ namespace GameCore
         public void EndQuest()
         {
             CurrentQuestState = QuestState.Completed;
-            _objectiveStep = 0;
             _questManager.RemoveActiveQuests(this);
             OnQuestCompleted?.Invoke(this);
             ClearQuestObjectives();
         }
 
         #region Quest's Objective Utility Functions
+
+        public int GetCompletedObjectivesCount()
+        {
+            return ObjectivesDictionary.Count(x => x.Value.ObjectiveState == QuestState.Completed);
+        }
 
         public void GetObjective(int objectiveId, ref QuestObjective objective)
         {
@@ -123,7 +116,6 @@ namespace GameCore
 
         private void SetupQuestObjectives()
         {
-            _objectiveStep = 0;
             foreach (var qObj in ObjectivesDictionary.Values)
             {
                 qObj.InitialiseObjective(this);

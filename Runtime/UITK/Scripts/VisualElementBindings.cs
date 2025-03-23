@@ -18,7 +18,8 @@ namespace GameCore.UI
     {
         MountComponent,
         FireEvents,
-        WriteDatastore
+        WriteDatastore,
+        WriteTag
     }
 
     [Serializable]
@@ -27,6 +28,7 @@ namespace GameCore.UI
         public ButtonType type;
         public string dataKey;
         public string target;
+        public string[] tags;
     }
 
     [Serializable]

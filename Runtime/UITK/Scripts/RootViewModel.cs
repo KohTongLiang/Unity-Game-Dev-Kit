@@ -30,6 +30,7 @@ namespace GameCore.UI
         [SerializeField] protected string pageName;
         [SerializeField] protected VisualTreeAsset UIAsset;
         [Tooltip("Mount component when this tag exists")] [SerializeField] protected string tag;
+        public string Tag => tag;
 
         [Header("Component Bindings")]
         [SerializeField] private LabelBinding[] labelBinding;
@@ -44,6 +45,7 @@ namespace GameCore.UI
         protected float templateContainerFlexGrow = 1f;
         protected TemplateContainer container;
         public readonly Stack<RootViewModel> OpenedComponents = new();
+        [field: SerializeField]
         public bool Active { get; protected set; }
         protected UiManager uiManager;
 
@@ -56,9 +58,9 @@ namespace GameCore.UI
         private void Start()
         {
             uiManager = ServiceLocator.For(this).Get<UiManager>();
-            uiManager.Datastore.RegisterCallback<string>(tag, value =>
+            uiManager.Datastore.RegisterCallback<HashSet<string>>("tags", value =>
             {
-                if (!string.IsNullOrEmpty(value)) Mount();
+                if (value.Contains(tag)) Mount();
                 else DisMount();
             });
         }
@@ -68,9 +70,17 @@ namespace GameCore.UI
         /// </summary>
         public virtual void Mount()
         {
+            if (Active) return;
             Active = true;
             uiManager = ServiceLocator.For(this).Get<UiManager>();
             if (uiManager == null) return;
+
+            if (uiManager.Datastore.TryGetValue("tags", out HashSet<string> tagList) && !tagList.Contains(tag))
+            {
+                tagList.Add(tag);
+                uiManager.Datastore.AddOrUpdate("tags", tagList);
+            }
+
             GameContentContainer = UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>(mountPoint);
             container = UIAsset.Instantiate();
             UIComponent = container.contentContainer;
@@ -103,6 +113,18 @@ namespace GameCore.UI
                         case ButtonType.WriteDatastore:
                             callbacks.Add(() => uiManager.Datastore.AddOrUpdate(buttonEvent.dataKey, buttonEvent.target));
                             break;
+                        case ButtonType.WriteTag:
+                            callbacks.Add(
+                                () =>
+                                {
+                                    HashSet<string> tags = new();
+                                    foreach (var tag in buttonEvent.tags)
+                                    {
+                                        tags.Add(tag);
+                                    }
+                                    uiManager.Datastore.AddOrUpdate("tags", tags);
+                                });
+                            break;
                     }
                 }
 
@@ -119,7 +141,12 @@ namespace GameCore.UI
         {
             if (!Active) return;
             Active = false;
-            uiManager.Datastore.AddOrUpdate(tag, "");
+
+            if (uiManager.Datastore.TryGetValue("tags", out HashSet<string> dataTags) && dataTags != null)
+            {
+                dataTags.Remove(tag);
+                uiManager.Datastore.AddOrUpdate("tags", dataTags);
+            }
 
             GameContentContainer.contentContainer.Remove(UIComponent);
             // Clean up callbacks

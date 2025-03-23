@@ -27,6 +27,7 @@ namespace GameCore.UI
             ServiceLocator.Global.Register(this);
             rootDocument = GetComponent<UIDocument>();
             currentPage = Pages[0];
+            datastore.AddOrUpdate("tags", new HashSet<string>());
             if (!currentPage.Active) currentPage.Mount();
         }
 

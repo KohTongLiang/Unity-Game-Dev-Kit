@@ -1,0 +1,10 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <engine:VisualElement name="root-container" style="flex-grow: 1;">
+        <engine:Label text="UI Manager" name="header-title" style="justify-content: center; align-self: center; font-size: 28px;" />
+        <engine:VisualElement name="divider" style="height: 2px; -unity-slice-top: 5; background-color: rgb(255, 255, 255);" />
+        <engine:VisualElement name="tag-segment" style="padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+            <engine:Button text="Load Tags" name="load-tags" />
+            <engine:VisualElement name="tag-container" style="flex-grow: 1;" />
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

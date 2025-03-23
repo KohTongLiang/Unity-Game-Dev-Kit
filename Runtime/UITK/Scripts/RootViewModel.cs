@@ -47,6 +47,12 @@ namespace GameCore.UI
         public bool Active { get; protected set; }
         protected UiManager uiManager;
 
+        public delegate void OnComponentMountedEvent();
+        public delegate void OnComponentDisMountedEvent();
+
+        public event OnComponentMountedEvent OnComponentMounted;
+        public event OnComponentDisMountedEvent OnComponentDisMounted;
+
         private void Start()
         {
             uiManager = ServiceLocator.For(this).Get<UiManager>();
@@ -102,6 +108,8 @@ namespace GameCore.UI
 
                 BindButton(binding.elementId, out _, callbacks);
             }
+
+            OnComponentMounted?.Invoke();
         }
 
         /// <summary>
@@ -126,6 +134,8 @@ namespace GameCore.UI
             {
                 obj.SetActive(false);
             }
+
+            OnComponentDisMounted?.Invoke();
         }
 
         #region Visual Element Bindings
@@ -137,7 +147,7 @@ namespace GameCore.UI
         /// <param name="button"></param>
         /// <param name="callback"></param>
         /// <returns>Optional Button</returns>
-        protected bool BindButton(string elementId, out Button button, Action callback)
+        public bool BindButton(string elementId, out Button button, Action callback)
         {
             button = UIComponent.Q<Button>(elementId);
             if (button == null)
@@ -158,7 +168,7 @@ namespace GameCore.UI
         /// <param name="button"></param>
         /// <param name="callbacks"></param>
         /// <returns>Optional Button</returns>
-        protected bool BindButton(string elementId, out Button button, List<Action> callbacks)
+        public bool BindButton(string elementId, out Button button, List<Action> callbacks)
         {
             button = UIComponent.Q<Button>(elementId);
             if (button == null)
@@ -184,7 +194,7 @@ namespace GameCore.UI
         /// <param name="listenCallback"></param>
         /// <param name="unListenCallback"></param>
         /// <returns></returns>
-        protected bool BindLabel(string elementId, out Label label)
+        public bool BindLabel(string elementId, out Label label)
         {
             label = UIComponent.Q<Label>(elementId);
             if (label == null)
@@ -204,7 +214,7 @@ namespace GameCore.UI
         /// <param name="listenCallback"></param>
         /// <param name="unListenCallback"></param>
         /// <returns></returns>
-        protected bool BindLabel(string elementId, out Label label, Action listenCallback, Action unListenCallback)
+        public bool BindLabel(string elementId, out Label label, Action listenCallback, Action unListenCallback)
         {
             label = UIComponent.Q<Label>(elementId);
             if (label == null)
@@ -226,7 +236,7 @@ namespace GameCore.UI
         /// <param name="listenCallback"></param>
         /// <param name="unListenCallback"></param>
         /// <returns></returns>
-        protected bool BindLabel(string elementId, out Label outputLabel, string dataKey = "")
+        public bool BindLabel(string elementId, out Label outputLabel, string dataKey = "")
         {
             Label label = UIComponent.Q<Label>(elementId);
 
@@ -267,7 +277,7 @@ namespace GameCore.UI
         /// <param name="elementId"></param>
         /// <param name="container"></param>
         /// <returns></returns>
-        protected bool BindContainer(string elementId, out VisualElement container)
+        public bool BindContainer(string elementId, out VisualElement container)
         {
             container = UIComponent.Q<VisualElement>(elementId);
             if (container == null)

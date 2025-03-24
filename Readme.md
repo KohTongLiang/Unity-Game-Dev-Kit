@@ -1,20 +1,23 @@
-# Game Core
+# Game Systems Template
 
-Framework for quick game development
+Template for quick game development
 
 ## Systems
 
-- Common Datastore and Event Manager
-- Behaviour Tree
-- Audio Manager
-- Highlighter
-- Game Director for Missions and Quests
-- Inventory and Equipments
-- Random GameObject utility such as billboard, oscillation, rotation.
+- Common Datastore and Event Manager (WIP)
+- Behaviour Tree with Blackboard
+- ~~Audio Manager~~
+- Highlighter (WIP)
+- Game Director for Missions and Quests (WIP)
+- Inventory and Equipments (WIP)
+- Simple Save (WIP)
+- Simple UITK Framework (WIP)
+- Common Shader Examples (WIP)
+- Random GameObject utilities such as billboard, oscillation, rotation, Layers.
 
-## Dependencies at the moment
+## Dependencies
 
-### Unity Packages
+### Unity Package Dependencies
 - Addressables
 - Cinemachine
 - Input System

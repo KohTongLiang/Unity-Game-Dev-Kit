@@ -4,19 +4,19 @@ namespace GameCore.UI
 {
     public class Components : MonoBehaviour
     {
-        protected RootViewModel viewModel;
+        protected RootViewModel ViewModel;
 
         private void OnEnable()
         {
-            viewModel = GetComponent<RootViewModel>();
-            viewModel.OnComponentMounted += OnMounted;
-            viewModel.OnComponentDisMounted += OnDisMounted;
+            ViewModel = GetComponent<RootViewModel>();
+            ViewModel.OnComponentMounted += OnMounted;
+            ViewModel.OnComponentDisMounted += OnDisMounted;
         }
 
         private void OnDisable()
         {
-            viewModel.OnComponentMounted -= OnMounted;
-            viewModel.OnComponentDisMounted -= OnDisMounted;
+            ViewModel.OnComponentMounted -= OnMounted;
+            ViewModel.OnComponentDisMounted -= OnDisMounted;
         }
 
         protected virtual void OnMounted()

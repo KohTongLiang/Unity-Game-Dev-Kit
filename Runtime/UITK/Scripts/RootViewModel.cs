@@ -25,8 +25,14 @@ namespace GameCore.UI
         protected readonly List<ButtonCallback> ButtonCallbacks = new();
         private readonly Queue<Action> _callbackQueue = new();
 
+        public enum MountPoint
+        {
+            GameContent,
+            OverlayContent
+        }
+
         [Header("Component Config")]
-        [SerializeField] protected string mountPoint = "GameContent";
+        [SerializeField] protected MountPoint mountPoint = MountPoint.GameContent;
         [SerializeField] protected string pageName;
         [SerializeField] protected VisualTreeAsset UIAsset;
         [Tooltip("Mount component when this tag exists")] [SerializeField] protected string tag;
@@ -75,17 +81,20 @@ namespace GameCore.UI
             uiManager = ServiceLocator.For(this).Get<UiManager>();
             if (uiManager == null) return;
 
-            if (uiManager.Datastore.TryGetValue("tags", out HashSet<string> tagList) && !tagList.Contains(tag))
+            if (uiManager.Datastore.TryGetValue("tags", out HashSet<string> tagList))
             {
                 tagList.Add(tag);
                 uiManager.Datastore.AddOrUpdate("tags", tagList);
             }
 
-            GameContentContainer = UiManager.Instance.rootDocument.rootVisualElement.Q<VisualElement>(mountPoint);
+            GameContentContainer = uiManager
+                .rootDocument.rootVisualElement.Q<VisualElement>(mountPoint.ToString());
             container = UIAsset.Instantiate();
             UIComponent = container.contentContainer;
             UIComponent.style.flexGrow = new StyleFloat(templateContainerFlexGrow);
             GameContentContainer.contentContainer.Add(UIComponent);
+            
+            if (mountPoint == MountPoint.OverlayContent) GameContentContainer.style.visibility = Visibility.Visible;
 
             foreach (var obj in objectDependents)
             {
@@ -147,6 +156,8 @@ namespace GameCore.UI
                 dataTags.Remove(tag);
                 uiManager.Datastore.AddOrUpdate("tags", dataTags);
             }
+            
+            if (mountPoint == MountPoint.OverlayContent) GameContentContainer.style.visibility = Visibility.Hidden;
 
             GameContentContainer.contentContainer.Remove(UIComponent);
             // Clean up callbacks
@@ -179,7 +190,6 @@ namespace GameCore.UI
             button = UIComponent.Q<Button>(elementId);
             if (button == null)
             {
-                Debug.LogError($"Button {elementId}: Not Found.");
                 return false;
             }
 
@@ -226,7 +236,6 @@ namespace GameCore.UI
             label = UIComponent.Q<Label>(elementId);
             if (label == null)
             {
-                Debug.LogError($"Label {elementId}: Not Found.");
                 return false;
             }
 

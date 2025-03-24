@@ -7,6 +7,9 @@ namespace GameCore.Examples
         [SerializeField] private Currency _currency;
         [SerializeField] private int _cost;
         [SerializeField] private string _requiredAchievement;
+        
+        public Currency CurrencyType => _currency;
+        public int Cost => _cost;
 
         public override bool CanUnlock(IPlayerUnlockProgress unlockProgress)
         {

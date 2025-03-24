@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityServiceLocator;
@@ -9,6 +8,7 @@ namespace GameCore
     public class UnlockManager : MonoBehaviour
     {
         [SerializeField] private List<BaseUnlockable> unlockables;
+        public List<BaseUnlockable> Unlockables => unlockables;
         
         private void Awake()
         {

@@ -16,7 +16,6 @@ namespace GameCore.UI
 
     public enum ButtonType
     {
-        MountComponent,
         FireEvents,
         WriteDatastore,
         WriteTag

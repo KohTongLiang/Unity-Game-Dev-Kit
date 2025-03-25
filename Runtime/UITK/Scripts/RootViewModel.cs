@@ -33,8 +33,10 @@ namespace GameCore.UI
 
         [Header("Component Config")]
         [SerializeField] protected MountPoint mountPoint = MountPoint.GameContent;
+        [Tooltip("Something descriptive for organisation sake. Not used at runtime.")] 
         [SerializeField] protected string pageName;
         [SerializeField] protected VisualTreeAsset UIAsset;
+        [SerializeField] protected float templateContainerFlexGrow = 1f;
         [Tooltip("Mount component when this tag exists")] [SerializeField] protected string tag;
         public string Tag => tag;
 
@@ -48,7 +50,6 @@ namespace GameCore.UI
 
         protected VisualElement UIComponent;
         protected VisualElement GameContentContainer;
-        protected float templateContainerFlexGrow = 1f;
         protected TemplateContainer container;
         public readonly Stack<RootViewModel> OpenedComponents = new();
         [field: SerializeField]
@@ -68,24 +69,18 @@ namespace GameCore.UI
             {
                 if (value.Contains(tag)) Mount();
                 else DisMount();
-            });
+            }, "default", true);
         }
 
         /// <summary>
         /// Mount component into UI Hierarchy.
         /// </summary>
-        public virtual void Mount()
+        protected virtual void Mount()
         {
             if (Active) return;
             Active = true;
             uiManager = ServiceLocator.For(this).Get<UiManager>();
             if (uiManager == null) return;
-
-            if (uiManager.Datastore.TryGetValue("tags", out HashSet<string> tagList))
-            {
-                tagList.Add(tag);
-                uiManager.Datastore.AddOrUpdate("tags", tagList);
-            }
 
             GameContentContainer = uiManager
                 .rootDocument.rootVisualElement.Q<VisualElement>(mountPoint.ToString());
@@ -113,9 +108,6 @@ namespace GameCore.UI
                 {
                     switch (buttonEvent.type)
                     {
-                        case ButtonType.MountComponent:
-                            callbacks.Add(() => uiManager.ShowPage(buttonEvent.target));
-                            break;
                         case ButtonType.FireEvents:
                             callbacks.Add(() => EventManager.Instance.TriggerEvent(buttonEvent.target));
                             break;
@@ -146,16 +138,10 @@ namespace GameCore.UI
         /// <summary>
         /// Remove component from UI Hierarchy.
         /// </summary>
-        public virtual void DisMount()
+        protected virtual void DisMount()
         {
             if (!Active) return;
             Active = false;
-
-            if (uiManager.Datastore.TryGetValue("tags", out HashSet<string> dataTags) && dataTags != null)
-            {
-                dataTags.Remove(tag);
-                uiManager.Datastore.AddOrUpdate("tags", dataTags);
-            }
             
             if (mountPoint == MountPoint.OverlayContent) GameContentContainer.style.visibility = Visibility.Hidden;
 
@@ -210,7 +196,6 @@ namespace GameCore.UI
             button = UIComponent.Q<Button>(elementId);
             if (button == null)
             {
-                Debug.LogError($"Button {elementId}: Not Found.");
                 return false;
             }
 
@@ -255,7 +240,6 @@ namespace GameCore.UI
             label = UIComponent.Q<Label>(elementId);
             if (label == null)
             {
-                Debug.LogError($"Label {elementId}: Not Found.");
                 return false;
             }
 
@@ -278,7 +262,6 @@ namespace GameCore.UI
 
             if (label == null)
             {
-                Debug.LogError($"Label {elementId}: Not Found.");
                 outputLabel = null;
                 return false;
             }
@@ -318,7 +301,6 @@ namespace GameCore.UI
             container = UIComponent.Q<VisualElement>(elementId);
             if (container == null)
             {
-                Debug.LogError($"Container {elementId}: Not Found.");
                 return false;
             }
 

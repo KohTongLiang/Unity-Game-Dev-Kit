@@ -9,7 +9,6 @@ namespace GameCore
     {
         [Header("Folder in Resource folder where Quests Scriptable Objects are Stored")]
         [SerializeField] private string questPath = "Quests";
-
         [SerializeField] private bool loadQuestsOnStart;
 
         // Stores all the quests available during the game runtime
@@ -59,9 +58,22 @@ namespace GameCore
             CreateQuestDictionary();
         }
 
-        public void ClearQuests()
+        /// <summary>
+        /// Remove all active quests.
+        /// </summary>
+        public void ClearActiveQuests()
         {
             ActiveQuests.Clear();
+        }
+
+        /// <summary>
+        /// Clear and rebuild all quests data.
+        /// </summary>
+        public void ResetAllQuests()
+        {
+            ClearActiveQuests();
+            _questMap.Clear();
+            CreateQuestDictionary();
         }
 
         #region Runtime Quest Utilities

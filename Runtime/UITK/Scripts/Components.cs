@@ -2,6 +2,7 @@
 
 namespace GameCore.UI
 {
+    [RequireComponent(typeof(RootViewModel))]
     public class Components : MonoBehaviour
     {
         protected RootViewModel ViewModel;

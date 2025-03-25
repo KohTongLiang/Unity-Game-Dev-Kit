@@ -123,7 +123,7 @@ namespace GameCore.UI
                                     {
                                         tags.Add(tag);
                                     }
-                                    uiManager.Datastore.AddOrUpdate("tags", tags);
+                                    uiManager.WriteTag(tags);
                                 });
                             break;
                     }
@@ -269,10 +269,7 @@ namespace GameCore.UI
             if (!string.IsNullOrEmpty(dataKey))
             {
                 string value = "";
-                uiManager.Datastore.TryGetReference(dataKey, ref value);
-                label.text = value;
-
-                uiManager.Datastore.RegisterCallback<string>(dataKey, UpdateCallback);
+                uiManager.Datastore.RegisterCallback<string>(dataKey, UpdateCallback, "default", true);
                 _callbackQueue.Enqueue(() =>
                 {
                     uiManager.Datastore.UnregisterCallback<string>(dataKey, UpdateCallback);

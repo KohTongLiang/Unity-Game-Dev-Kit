@@ -27,10 +27,16 @@ namespace GameCore.UI
         }
         
         /// <summary>
-        /// Override all existing tags.
+        /// Override all existing tags with a single tag.
         /// </summary>
         /// <param name="tag"></param>
         public void WriteTag (string tag) => datastore.AddOrUpdate("tags", new HashSet<string>(){tag});
+        
+        /// <summary>
+        /// Override all tags with new set of tags.
+        /// </summary>
+        /// <param name="tags"></param>
+        public void WriteTag (HashSet<string> tags) => datastore.AddOrUpdate("tags", tags);
         
         /// <summary>
         /// Append to existing tags.

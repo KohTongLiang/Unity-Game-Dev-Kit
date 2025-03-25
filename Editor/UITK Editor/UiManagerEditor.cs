@@ -25,6 +25,7 @@ namespace GameCore.UI
         private void OnEnable()
         {
             so = serializedObject;
+            manager = target as UiManager;
             defaultTagProperty = so.FindProperty("DefaultTags");
         }
         

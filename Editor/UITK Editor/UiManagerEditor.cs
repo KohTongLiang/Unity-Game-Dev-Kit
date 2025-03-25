@@ -30,7 +30,8 @@ namespace GameCore.UI
         
         public override VisualElement CreateInspectorGUI()
         {
-            var mInspectorXML = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Game-Core/Editor/UITK Editor/Custom UI Manager Inspector.uxml");
+            var mInspectorXML = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(System.IO.Path.Combine(
+                System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this))) ?? string.Empty, "Custom UI Manager Inspector.uxml"));
             inspectorElement = mInspectorXML.Instantiate();
             tagContainer = inspectorElement.Q<VisualElement>("tag-container");
             tagEditorContainer = inspectorElement.Q<VisualElement>("tag-management-editor");

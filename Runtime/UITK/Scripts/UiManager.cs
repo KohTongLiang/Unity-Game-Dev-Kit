@@ -65,5 +65,20 @@ namespace GameCore.UI
             }
             else datastore.AddOrUpdate("tags", new HashSet<string>());
         }
+        
+        
+        /// <summary>
+        /// Check if tag exists in the data store.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public bool CheckTagExists (string tag)
+        {
+            if (datastore.TryGetValue("tags", out HashSet<string> tags))
+            {
+                return tags.Contains(tag);
+            }
+            else return false;
+        }
     }
 }

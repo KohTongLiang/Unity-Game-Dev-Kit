@@ -19,6 +19,8 @@ namespace GameCore
         [Header("Blueprint Reference")]
         public ItemSo ItemBlueprint;
 
+        public string ItemSpriteResourcePath => ItemBlueprint.ItemIconResourcePath;
+
         protected virtual void Awake()
         {
             if (registerOnAwake)

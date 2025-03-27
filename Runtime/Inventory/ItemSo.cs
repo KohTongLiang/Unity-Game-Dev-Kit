@@ -10,11 +10,14 @@ namespace GameCore
         public string ItemAssetIdName;
         public string ItemName;
         public string ItemDescription;
+        public Sprite ItemIcon;
+        public string ItemIconResourcePath;
         public GameObject ItemPrefab;
 
         #if UNITY_EDITOR
         private void OnValidate()
         {
+            ItemIconResourcePath = UnityEditor.AssetDatabase.GetAssetPath(ItemIcon);
             ItemAssetId = ItemAssetIdName.ComputeFNV1aHash();
             UnityEditor.EditorUtility.SetDirty(this);
         }

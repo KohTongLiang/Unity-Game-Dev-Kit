@@ -216,5 +216,10 @@ namespace GameCore
             _currentEquippableIndex = 0;
             _equippables.Clear();
         }
+
+        public int GetEquipmentIndex(IEquippable equipment)
+        {
+            return _equippables.IndexOf(equipment);
+        }
     }
 }

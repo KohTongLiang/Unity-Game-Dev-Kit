@@ -71,6 +71,9 @@ namespace GameCore
         /// </summary>
         public void ResetAllQuests()
         {
+            OnQuestStarted = null;
+            OnQuestEnded = null;
+            OnQuestUpdated = null;
             ClearActiveQuests();
             _questMap.Clear();
             CreateQuestDictionary();

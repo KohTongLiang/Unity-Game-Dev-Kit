@@ -55,6 +55,7 @@ namespace GameCore.UI
         [field: SerializeField]
         public bool Active { get; protected set; }
         protected UiManager uiManager;
+        public UiManager UiManager => uiManager;
 
         public delegate void OnComponentMountedEvent();
         public delegate void OnComponentDisMountedEvent();

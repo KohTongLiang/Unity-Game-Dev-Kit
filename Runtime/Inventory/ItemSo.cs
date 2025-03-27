@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 namespace GameCore
@@ -15,12 +16,32 @@ namespace GameCore
         public GameObject ItemPrefab;
 
         #if UNITY_EDITOR
+        
         private void OnValidate()
         {
-            ItemIconResourcePath = UnityEditor.AssetDatabase.GetAssetPath(ItemIcon);
+            if (ItemIcon != null) ItemIconResourcePath = GetResourcesPath(UnityEditor.AssetDatabase.GetAssetPath(ItemIcon));
             ItemAssetId = ItemAssetIdName.ComputeFNV1aHash();
             UnityEditor.EditorUtility.SetDirty(this);
         }
-#endif
+        private string GetResourcesPath(string fullPath)
+        {
+            // Check if the path contains a "Resources" folder
+            int resourcesIndex = fullPath.IndexOf("/Resources/");
+            if (resourcesIndex == -1)
+            {
+                Debug.LogError("Sprite must be inside a Resources folder!");
+                return "";
+            }
+
+            // Extract the part after "Resources/"
+            string resourcesRelativePath = fullPath.Substring(resourcesIndex + "/Resources/".Length);
+
+            // Remove file extension (e.g., ".png")
+            resourcesRelativePath = Path.ChangeExtension(resourcesRelativePath, null);
+
+            return resourcesRelativePath;
+        }
+        
+        #endif
     }
 }

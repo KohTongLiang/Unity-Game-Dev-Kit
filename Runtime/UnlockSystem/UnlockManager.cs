@@ -67,7 +67,6 @@ namespace GameCore
                 });
             }
             
-            Debug.Log($"{JsonConvert.SerializeObject(saveData)}");
             _saveSystem.Save(UNLOCK_DATA_KEY, saveData, MergePolicy.Overwrite);
         }
 

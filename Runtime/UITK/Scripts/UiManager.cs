@@ -24,6 +24,7 @@ namespace GameCore.UI
                 initialTags.Add(tag);
             }
             datastore.AddOrUpdate("tags", initialTags);
+            rootDocument.rootVisualElement.style.flexGrow = new StyleFloat(1f);
         }
         
         /// <summary>

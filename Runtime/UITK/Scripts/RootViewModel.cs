@@ -94,7 +94,7 @@ namespace GameCore.UI
 
             foreach (var obj in objectDependents)
             {
-                obj.SetActive(true);
+                obj?.SetActive(true);
             }
 
             foreach (var binding in labelBinding)
@@ -157,7 +157,7 @@ namespace GameCore.UI
 
             foreach (var obj in objectDependents)
             {
-                obj.SetActive(false);
+                obj?.SetActive(false);
             }
 
             OnComponentDisMounted?.Invoke();

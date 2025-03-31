@@ -12,6 +12,39 @@ namespace GameCore
     {
         private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> sceneLoaded = new();
 
+
+        /// <summary>
+        /// Load in a scene using its addressable address from CDN.
+        /// </summary>
+        /// <param name="sceneAddress">Addressable address</param>
+        /// <param name="webRequestToken">Token to access private bucket on Unity CDN</param>
+        /// <param name="origin">The caller of the function</param>
+        /// <param name="mode">Single, Additive etc.</param>
+        /// <param name="setSceneActive">Specify to set the newly loaded scene as active</param>
+        /// <param name="sceneLoadedCallback">Callback that will be fired once the scene is loaded successfully.</param>
+        public void LoadSceneByCdn(
+            string sceneAddress,
+            string webRequestToken,
+            string origin,
+            LoadSceneMode mode,
+            bool setSceneActive = false,
+            Action sceneLoadedCallback = null)
+        {
+            if (sceneLoaded.ContainsKey(sceneAddress + origin)) return;
+
+            // Load the scene using Addressable
+            var encodedToken = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($":{webRequestToken}"));
+            Addressables.WebRequestOverride = webRequest =>
+            {
+                webRequest.SetRequestHeader("Authorization", "Basic " + encodedToken);
+            };
+            
+            var assetOperation = Addressables.LoadSceneAsync(sceneAddress, mode);
+            Debug.Log($"Loading scene from CDN: {sceneAddress}");
+            assetOperation.Completed += obj =>
+                OnSceneLoaded(obj, sceneAddress + origin, setSceneActive, sceneLoadedCallback);
+        }
+
         /// <summary>
         /// Load in a scene using its addressable address.
         /// </summary>
@@ -54,6 +87,7 @@ namespace GameCore
             {
                 // Remove the scene from the dictionary if it failed to load
                 Debug.LogError("Failed to load scene.");
+                Debug.LogError($"{obj.OperationException}");
             }
         }
 

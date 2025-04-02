@@ -5,78 +5,117 @@ namespace GameCore
 {
     public class EventManager : Singleton<EventManager>
     {
-        private readonly Dictionary<string, List<object>> _eventDictionary = new();
+        private readonly Dictionary<int, List<object>> eventDictionary = new();
 
-        public void RegisterListener(string eventName, Action listener)
+        public void RegisterListener(EventKey eventKey, Action listener)
         {
-            if (_eventDictionary.TryGetValue(eventName, out var thisEvent))
-            {
+            if (eventDictionary.TryGetValue(eventKey.EventId, out var thisEvent))
                 thisEvent.Add(listener);
-            }
             else
-            {
-                _eventDictionary.Add(eventName, new List<object> { listener });
-            }
+                eventDictionary.Add(eventKey.EventId, new List<object> { listener });
         }
 
-        public void RegisterListener<T>(string eventName, Action<T> listener)
+        public void RegisterListener<T>(EventKey eventKey, Action<T> listener)
         {
-            if (_eventDictionary.TryGetValue(eventName, out var thisEvent))
-            {
+            if (eventDictionary.TryGetValue(eventKey.EventId, out var thisEvent))
                 thisEvent.Add(listener);
-            }
             else
-            {
-                _eventDictionary.Add(eventName, new List<object> { listener });
-            }
+                eventDictionary.Add(eventKey.EventId, new List<object> { listener });
         }
 
-        public void UnRegisterListener(string eventName, Action listener)
+        public void UnRegisterListener(EventKey eventKey, Action listener)
         {
-            if (_eventDictionary.TryGetValue(eventName, out var thisEvent))
-            {
-                thisEvent.Remove(listener);
-            }
+            if (eventDictionary.TryGetValue(eventKey.EventId, out var thisEvent)) thisEvent.Remove(listener);
         }
 
-        public void UnRegisterListener<T>(string eventName, Action<T> listener)
+        public void UnRegisterListener<T>(EventKey eventKey, Action<T> listener)
         {
-            if (_eventDictionary.TryGetValue(eventName, out var thisEvent))
-            {
-                thisEvent.Remove(listener);
-            }
+            if (eventDictionary.TryGetValue(eventKey.EventId, out var thisEvent)) thisEvent.Remove(listener);
         }
 
-        public void TriggerEvent(string eventName)
+
+        public void TriggerEvent(EventKey eventKey)
         {
-            if (_eventDictionary.TryGetValue(eventName, out var thisEvent))
+            if (eventDictionary.TryGetValue(eventKey.EventId, out var thisEvent))
             {
                 List<object> invokeQueue = new(thisEvent);
 
                 foreach (var action in invokeQueue)
-                {
                     if (action is Action typedAction)
-                    {
                         typedAction.Invoke();
-                    }
-                }
+            }
+        }
+
+        public void TriggerEvent<T>(EventKey eventKey, T value)
+        {
+            if (eventDictionary.TryGetValue(eventKey.EventId, out var thisEvent))
+            {
+                List<object> invokeQueue = new(thisEvent);
+
+                foreach (var action in invokeQueue)
+                    if (action is Action<T> typedAction)
+                        typedAction.Invoke(value);
+            }
+        }
+
+        #region Old Functions
+
+        public void RegisterListener(string eventName, Action listener)
+        {
+            var eventId = eventName.ComputeFNV1aHash();
+            if (eventDictionary.TryGetValue(eventId, out var thisEvent))
+                thisEvent.Add(listener);
+            else
+                eventDictionary.Add(eventId, new List<object> { listener });
+        }
+
+        public void RegisterListener<T>(string eventName, Action<T> listener)
+        {
+            var eventId = eventName.ComputeFNV1aHash();
+            if (eventDictionary.TryGetValue(eventId, out var thisEvent))
+                thisEvent.Add(listener);
+            else
+                eventDictionary.Add(eventId, new List<object> { listener });
+        }
+
+        public void UnRegisterListener(string eventName, Action listener)
+        {
+            var eventId = eventName.ComputeFNV1aHash();
+            if (eventDictionary.TryGetValue(eventId, out var thisEvent)) thisEvent.Remove(listener);
+        }
+
+        public void UnRegisterListener<T>(string eventName, Action<T> listener)
+        {
+            var eventId = eventName.ComputeFNV1aHash();
+            if (eventDictionary.TryGetValue(eventId, out var thisEvent)) thisEvent.Remove(listener);
+        }
+
+        public void TriggerEvent(string eventName)
+        {
+            var eventId = eventName.ComputeFNV1aHash();
+            if (eventDictionary.TryGetValue(eventId, out var thisEvent))
+            {
+                List<object> invokeQueue = new(thisEvent);
+
+                foreach (var action in invokeQueue)
+                    if (action is Action typedAction)
+                        typedAction.Invoke();
             }
         }
 
         public void TriggerEvent<T>(string eventName, T eventParam)
         {
-            if (_eventDictionary.TryGetValue(eventName, out var thisEvent))
+            var eventId = eventName.ComputeFNV1aHash();
+            if (eventDictionary.TryGetValue(eventId, out var thisEvent))
             {
                 List<object> invokeQueue = new(thisEvent);
 
                 foreach (var action in invokeQueue)
-                {
                     if (action is Action<T> typedAction)
-                    {
                         typedAction.Invoke(eventParam);
-                    }
-                }
             }
         }
+
+        #endregion
     }
 }

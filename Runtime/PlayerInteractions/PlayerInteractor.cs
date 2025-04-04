@@ -14,7 +14,7 @@ namespace GameCore
 
         public void Interact()
         {
-            CurrentInteractable.Interact();
+            CurrentInteractable?.Interact();
         }
     }
 }
